@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { authRoutes } from './modules/auth/routes/auth-routes';
 import { usersRoutes } from './modules/users/routes/users-routes';
@@ -14,10 +15,17 @@ import { adminRoutes } from './modules/admin/routes/admin-routes';
 import { requireJwt, requireRole } from './core/middleware/auth-middleware';
 
 export const app = express();
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
+app.use('/api', apiLimiter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
