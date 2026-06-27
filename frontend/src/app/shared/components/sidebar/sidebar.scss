@@ -1,0 +1,21 @@
+.sidebar {
+  border-right: 1px solid var(--border-color);
+  background: var(--surface-elevated);
+  height: 100%;
+}
+
+@media (max-width: 960px) {
+  .sidebar {
+    display: none;
+  }
+
+  .sidebar.open {
+    display: block;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 280px;
+    z-index: 9;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.2);
+  }
+}

@@ -1,0 +1,13 @@
+<mat-toolbar class="navbar" color="primary">
+  <button mat-icon-button (click)="menuToggled.emit()" aria-label="Toggle navigation">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="brand">{{ title }}</span>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="themeService.toggleTheme()" aria-label="Toggle theme">
+    <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+  @if (!isAuthenticated) {
+  <button mat-flat-button color="accent" (click)="demoLoginClicked.emit()">Try Demo</button>
+  }
+</mat-toolbar>

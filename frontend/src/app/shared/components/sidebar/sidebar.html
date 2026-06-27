@@ -1,0 +1,10 @@
+<aside class="sidebar" [class.open]="open">
+  <mat-nav-list>
+    @for (link of links; track link.route) {
+    <a mat-list-item [routerLink]="link.route" (click)="navigate.emit()">
+      <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
+      <span matListItemTitle>{{ link.label }}</span>
+    </a>
+    }
+  </mat-nav-list>
+</aside>

@@ -1,0 +1,14 @@
+<section class="page">
+  <h1>Authentication</h1>
+  <p>Firebase Authentication flow scaffold for Login, Signup, Forgot Password and Email Verification.</p>
+  <div class="actions">
+    <button class="btn" (click)="switchMode('login')">Login</button>
+    <button class="btn" (click)="switchMode('signup')">Signup</button>
+    <button class="btn" (click)="switchMode('forgot')">Forgot Password</button>
+  </div>
+  <p>Current flow: <strong>{{ mode() }}</strong></p>
+  <div class="actions">
+    <button class="btn btn-primary" (click)="continueWithGoogle()">Continue with Google</button>
+    <button class="btn btn-secondary" (click)="continueWithEmail()">Continue with Email</button>
+  </div>
+</section>

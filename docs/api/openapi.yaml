@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: Genz Studio API
+  version: 1.0.0
+  description: REST API scaffold for authentication, creator tools, projects, billing and admin modules.
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Healthy service
+  /api/auth/login:
+    post:
+      summary: Login with email/password or federated providers
+      responses:
+        '200':
+          description: JWT and user profile
+  /api/auth/signup:
+    post:
+      summary: Signup endpoint
+      responses:
+        '201':
+          description: JWT and user profile
+  /api/dashboard:
+    get:
+      summary: User dashboard summary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard payload
+  /api/ai-tools:
+    get:
+      summary: AI tools metadata catalog
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of AI tools
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

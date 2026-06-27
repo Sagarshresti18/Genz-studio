@@ -1,0 +1,16 @@
+<app-navbar
+  [title]="title()"
+  [isAuthenticated]="isAuthenticated()"
+  (menuToggled)="toggleNav()"
+  (demoLoginClicked)="loginAsDemo()"
+></app-navbar>
+
+<div class="layout">
+  <app-sidebar [open]="navOpen()" (navigate)="closeNav()"></app-sidebar>
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<app-footer></app-footer>
+<app-toast></app-toast>
