@@ -1,5 +1,24 @@
 # Component Guidelines
 
+## Structure
+
+- Keep components focused on rendering and interaction.
+- Move data fetching into services.
+- Put shared UI pieces in a reusable folder.
+
+## Styling
+
+- Use component-scoped SCSS where possible.
+- Keep design tokens or shared variables centralized.
+- Avoid repeating layout logic across multiple screens.
+
+## Behavior
+
+- Pass data through inputs and outputs instead of coupling components tightly.
+- Keep form validation close to the form.
+- Prefer clear naming over abbreviations.
+# Component Guidelines
+
 ## Overview
 
 Components are the building blocks of the GenZ Studio frontend.
