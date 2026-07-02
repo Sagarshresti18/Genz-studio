@@ -1,5 +1,25 @@
 # Frontend Architecture
 
+The frontend is an Angular application that will consume the backend API and present the creation workflows for GenZ Studio.
+
+## Current Entry Points
+
+- `client/src/main.ts` bootstraps the app.
+- `client/src/app/` contains the root app component, routes, config, and styles.
+
+## Architecture Goals
+
+- Keep feature views isolated by route.
+- Share UI primitives where it improves consistency.
+- Put API access behind a small service layer.
+
+## Integration Points
+
+- The client should call the backend API under `/api`.
+- API URLs should come from environment configuration.
+- Health endpoints can be used during local development and deployment checks.
+# Frontend Architecture
+
 ## Overview
 
 The GenZ Studio frontend is built using Angular 20 and serves as the primary user interface for the platform.

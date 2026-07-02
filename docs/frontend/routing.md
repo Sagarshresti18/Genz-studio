@@ -1,3 +1,19 @@
+# Routing
+
+The app should use route-driven features rather than a single large page.
+
+## Suggested Route Groups
+
+- Landing and authentication views.
+- Creation workspace views.
+- Asset management views.
+- Account and settings views.
+
+## Routing Guidelines
+
+- Keep route components small.
+- Load feature code lazily when the route is not part of the critical path.
+- Prefer route-level guards for auth-protected areas.
 # Frontend Routing
 
 ## Overview
