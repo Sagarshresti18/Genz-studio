@@ -8,15 +8,6 @@ An AI-powered creator platform for designing YouTube banners, thumbnails, profil
 - `server/` Node.js + Express backend
 - `docs/` architecture and development notes
 
-## Why `node_modules` Exists
-
-`node_modules` is created when you run `npm install`. It is where npm stores the packages required by the frontend and backend at runtime.
-
-- It is necessary on your local machine so the project can run.
-- It should not be committed to Git.
-- This repository ignores `node_modules` through `.gitignore`.
-- If you see a `node_modules` folder at the repo root after removing the root `package.json`, it is an old local install and is not needed for this project structure.
-
 ## Prerequisites
 
 - Git
