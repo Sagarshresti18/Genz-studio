@@ -1,0 +1,449 @@
+<!-- ============================================================
+     GenZ Studio — Landing Page
+     ============================================================ -->
+
+<!-- ─── NAVBAR ─────────────────────────────────────── -->
+<nav class="navbar" [class.scrolled]="scrolled()">
+  <div class="navbar__inner container">
+    <!-- Logo -->
+    <a class="navbar__logo" (click)="scrollToSection('hero')">
+      <span class="navbar__logo-icon">◆</span>
+      <span class="navbar__logo-text">GenZ <span class="gradient-text">Studio</span></span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <ul class="navbar__links">
+      <li><a (click)="scrollToSection('features')">Features</a></li>
+      <li><a (click)="scrollToSection('ai-tools')">AI Tools</a></li>
+      <li><a (click)="scrollToSection('pricing')">Pricing</a></li>
+      <li><a (click)="scrollToSection('faq')">FAQ</a></li>
+    </ul>
+
+    <!-- Desktop CTA -->
+    <div class="navbar__actions">
+      <button class="btn btn--ghost" routerLink="/login">Log in</button>
+      <button class="btn btn--primary" routerLink="/register">Get Started <span class="btn__arrow">→</span></button>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="navbar__hamburger" (click)="toggleMobileNav()" [class.active]="mobileNavOpen()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="navbar__mobile" [class.open]="mobileNavOpen()">
+    <ul class="navbar__mobile-links">
+      <li><a (click)="scrollToSection('features')">Features</a></li>
+      <li><a (click)="scrollToSection('ai-tools')">AI Tools</a></li>
+      <li><a (click)="scrollToSection('pricing')">Pricing</a></li>
+      <li><a (click)="scrollToSection('faq')">FAQ</a></li>
+    </ul>
+    <div class="navbar__mobile-actions">
+      <button class="btn btn--ghost btn--full" routerLink="/login">Log in</button>
+      <button class="btn btn--primary btn--full" routerLink="/register">Get Started →</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO SECTION ───────────────────────────────── -->
+<section class="hero" id="hero">
+  <!-- Animated Orbs -->
+  <div class="hero__orbs">
+    <div class="hero__orb hero__orb--1"></div>
+    <div class="hero__orb hero__orb--2"></div>
+    <div class="hero__orb hero__orb--3"></div>
+    <div class="hero__orb hero__orb--4"></div>
+  </div>
+
+  <!-- Grid Pattern -->
+  <div class="hero__grid-pattern"></div>
+
+  <div class="hero__content container">
+    <div class="hero__badge animate-on-scroll">
+      <span class="hero__badge-dot"></span>
+      <span>Now with 22 AI Tools — See what's new</span>
+    </div>
+
+    <h1 class="hero__title animate-on-scroll">
+      Everything a Creator Needs.
+      <br />
+      <span class="gradient-text">Powered by AI.</span>
+    </h1>
+
+    <p class="hero__subtitle animate-on-scroll">
+      Design, edit videos, write content, and manage your brand — all from one
+      AI-powered platform built for the next generation of creators.
+    </p>
+
+    <div class="hero__ctas animate-on-scroll">
+      <button class="btn btn--primary btn--lg" routerLink="/register">
+        Get Started Free <span class="btn__arrow">→</span>
+      </button>
+      <button class="btn btn--outlined btn--lg">
+        <span class="btn__play">▶</span> Watch Demo
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="hero__stats animate-on-scroll">
+      @for (stat of stats; track stat.label) {
+        <div class="hero__stat">
+          <span class="hero__stat-value">{{ stat.value }}</span>
+          <span class="hero__stat-label">{{ stat.label }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRUSTED BY ─────────────────────────────────── -->
+<section class="trusted animate-on-scroll">
+  <div class="container">
+    <p class="trusted__label">Trusted by creators worldwide</p>
+    <div class="trusted__logos">
+      @for (brand of trustedBrands; track brand) {
+        <span class="trusted__logo">{{ brand }}</span>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ───────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <span class="section-tag">Features</span>
+      <h2 class="section-title">
+        One Platform. <span class="gradient-text">Infinite Possibilities.</span>
+      </h2>
+      <p class="section-subtitle">
+        Every tool you need to create, collaborate, and conquer — unified in one
+        powerful workspace.
+      </p>
+    </div>
+
+    <div class="features__grid">
+      @for (feature of features; track feature.title; let i = $index) {
+        <div class="features__card animate-on-scroll" [style.animation-delay]="(i * 80) + 'ms'">
+          <div class="features__card-icon">{{ feature.icon }}</div>
+          <h3 class="features__card-title">{{ feature.title }}</h3>
+          <p class="features__card-desc">{{ feature.description }}</p>
+          <div class="features__card-glow"></div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── AI TOOLS SHOWCASE ──────────────────────────── -->
+<section class="ai-tools" id="ai-tools">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <span class="section-tag">AI Tools</span>
+      <h2 class="section-title">
+        AI That Creates <span class="gradient-text">With You</span>
+      </h2>
+      <p class="section-subtitle">
+        22 specialized AI tools, each fine-tuned for creative workflows. Just
+        describe what you need — AI handles the rest.
+      </p>
+    </div>
+
+    <div class="ai-tools__showcase animate-on-scroll">
+      <!-- Tab Navigation -->
+      <div class="ai-tools__tabs">
+        @for (tool of aiTools; track tool.id) {
+          <button
+            class="ai-tools__tab"
+            [class.active]="activeToolTab() === tool.id"
+            (click)="setActiveToolTab(tool.id)"
+          >
+            <span class="ai-tools__tab-icon">{{ tool.icon }}</span>
+            <span class="ai-tools__tab-name">{{ tool.name }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Demo Area -->
+      <div class="ai-tools__demo">
+        <div class="ai-tools__demo-card">
+          <!-- Glow -->
+          <div class="ai-tools__demo-glow" [style.background]="activeTool().gradient"></div>
+
+          <!-- Header -->
+          <div class="ai-tools__demo-header">
+            <div class="ai-tools__demo-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="ai-tools__demo-title">{{ activeTool().name }}</span>
+            <div class="ai-tools__demo-status">
+              <span class="ai-tools__demo-status-dot"></span>
+              AI Ready
+            </div>
+          </div>
+
+          <!-- Prompt -->
+          <div class="ai-tools__demo-prompt">
+            <span class="ai-tools__demo-prompt-label">Prompt</span>
+            <p class="ai-tools__demo-prompt-text">{{ activeTool().prompt }}</p>
+          </div>
+
+          <!-- Output -->
+          <div class="ai-tools__demo-output">
+            <span class="ai-tools__demo-output-label">
+              <span class="ai-tools__demo-output-spinner"></span>
+              AI Output
+            </span>
+            <div class="ai-tools__demo-output-content" [style.border-color]="activeTool().gradient">
+              <div class="ai-tools__demo-output-preview" [style.background]="activeTool().gradient"></div>
+              <p class="ai-tools__demo-output-text">{{ activeTool().output }}</p>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="ai-tools__demo-footer">
+            <span class="ai-tools__demo-metric">⚡ 2.3s generation time</span>
+            <span class="ai-tools__demo-metric">🎯 98% quality score</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ───────────────────────────────── -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <span class="section-tag">How It Works</span>
+      <h2 class="section-title">
+        Three Steps to <span class="gradient-text">Brilliance</span>
+      </h2>
+      <p class="section-subtitle">
+        From idea to published content in minutes, not hours.
+      </p>
+    </div>
+
+    <div class="how-it-works__flow animate-on-scroll">
+      @for (step of howItWorks; track step.step; let i = $index) {
+        <div class="how-it-works__step">
+          <div class="how-it-works__step-number">{{ step.step }}</div>
+          <div class="how-it-works__step-icon">{{ step.icon }}</div>
+          <h3 class="how-it-works__step-title">{{ step.title }}</h3>
+          <p class="how-it-works__step-desc">{{ step.description }}</p>
+        </div>
+        @if (i < howItWorks.length - 1) {
+          <div class="how-it-works__connector">
+            <div class="how-it-works__connector-line"></div>
+            <div class="how-it-works__connector-arrow">→</div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ────────────────────────────────────── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <span class="section-tag">Pricing</span>
+      <h2 class="section-title">
+        Simple, <span class="gradient-text">Transparent</span> Pricing
+      </h2>
+      <p class="section-subtitle">
+        Start free. Upgrade when you're ready. No hidden fees. Cancel anytime.
+      </p>
+    </div>
+
+    <!-- Toggle -->
+    <div class="pricing__toggle animate-on-scroll">
+      <span [class.active]="!isAnnual()">Monthly</span>
+      <button class="pricing__switch" [class.annual]="isAnnual()" (click)="togglePricing()">
+        <span class="pricing__switch-thumb"></span>
+      </button>
+      <span [class.active]="isAnnual()">
+        Annual <span class="pricing__save-badge">Save 20%</span>
+      </span>
+    </div>
+
+    <!-- Cards -->
+    <div class="pricing__grid animate-on-scroll">
+      @for (plan of pricingPlans; track plan.name) {
+        <div class="pricing__card" [class.popular]="plan.popular">
+          @if (plan.popular) {
+            <div class="pricing__popular-badge">Most Popular</div>
+          }
+          <div class="pricing__card-header">
+            <h3 class="pricing__plan-name">{{ plan.name }}</h3>
+            <p class="pricing__plan-desc">{{ plan.description }}</p>
+            <div class="pricing__price">
+              @if (getPrice(plan) === 0) {
+                <span class="pricing__price-amount">$0</span>
+                <span class="pricing__price-period">free forever</span>
+              } @else {
+                <span class="pricing__price-currency">$</span>
+                <span class="pricing__price-amount">{{ getPrice(plan) }}</span>
+                <span class="pricing__price-period">{{ getBillingPeriod() }}</span>
+              }
+            </div>
+          </div>
+          <ul class="pricing__features">
+            @for (feature of plan.features; track feature) {
+              <li class="pricing__feature">
+                <span class="pricing__feature-check">✓</span>
+                {{ feature }}
+              </li>
+            }
+          </ul>
+          <button
+            class="btn pricing__cta"
+            [class.btn--primary]="plan.popular"
+            [class.btn--outlined]="!plan.popular"
+          >
+            {{ plan.cta }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ───────────────────────────────── -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <span class="section-tag">Testimonials</span>
+      <h2 class="section-title">
+        What Creators <span class="gradient-text">Say</span>
+      </h2>
+      <p class="section-subtitle">
+        Join thousands of creators who've transformed their workflow.
+      </p>
+    </div>
+
+    <div class="testimonials__grid animate-on-scroll">
+      @for (testimonial of testimonials; track testimonial.name; let i = $index) {
+        <div class="testimonials__card" [style.animation-delay]="(i * 100) + 'ms'">
+          <div class="testimonials__stars">
+            @for (star of starsArray(testimonial.stars); track star) {
+              <span class="testimonials__star">★</span>
+            }
+          </div>
+          <p class="testimonials__quote">"{{ testimonial.quote }}"</p>
+          <div class="testimonials__author">
+            <div
+              class="testimonials__avatar"
+              [style.background]="testimonial.color"
+            >
+              {{ testimonial.initials }}
+            </div>
+            <div class="testimonials__author-info">
+              <span class="testimonials__name">{{ testimonial.name }}</span>
+              <span class="testimonials__role">{{ testimonial.role }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ─────────────────────────────────────────── -->
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <span class="section-tag">FAQ</span>
+      <h2 class="section-title">
+        Frequently Asked <span class="gradient-text">Questions</span>
+      </h2>
+      <p class="section-subtitle">
+        Everything you need to know about GenZ Studio.
+      </p>
+    </div>
+
+    <div class="faq__list animate-on-scroll">
+      @for (item of faqItems; track item.question; let i = $index) {
+        <div class="faq__item" [class.open]="faqOpenState()[i]">
+          <button class="faq__question" (click)="toggleFaq(i)">
+            <span>{{ item.question }}</span>
+            <span class="faq__chevron">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq__answer">
+            <div class="faq__answer-inner">
+              <p>{{ item.answer }}</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── FINAL CTA ──────────────────────────────────── -->
+<section class="final-cta">
+  <div class="final-cta__particles">
+    @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+      <div class="final-cta__particle" [style.--particle-index]="i"></div>
+    }
+  </div>
+  <div class="container final-cta__content animate-on-scroll">
+    <h2 class="final-cta__title">
+      Ready to Create Something <br /><span>Amazing?</span>
+    </h2>
+    <p class="final-cta__subtitle">
+      Join 50,000+ creators who are already building the future with GenZ Studio.
+    </p>
+    <button class="btn final-cta__btn" routerLink="/register">
+      Get Started Free <span class="btn__arrow">→</span>
+    </button>
+    <p class="final-cta__note">No credit card required. Free plan available.</p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      @for (column of footerColumns; track column.title) {
+        <div class="footer__column">
+          <h4 class="footer__column-title">{{ column.title }}</h4>
+          <ul class="footer__column-links">
+            @for (link of column.links; track link) {
+              <li><a href="#">{{ link }}</a></li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <div class="footer__bottom">
+      <div class="footer__bottom-left">
+        <a class="footer__logo">
+          <span class="navbar__logo-icon">◆</span>
+          <span class="navbar__logo-text">GenZ <span class="gradient-text">Studio</span></span>
+        </a>
+        <p class="footer__tagline">AI-powered creative platform for the next generation.</p>
+      </div>
+
+      <div class="footer__social">
+        @for (social of socialLinks; track social.name) {
+          <a class="footer__social-link" [title]="social.name" href="#">
+            <span>{{ social.letter }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <div class="footer__copyright">
+      <p>© 2026 GenZ Studio. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
