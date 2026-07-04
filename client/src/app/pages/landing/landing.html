@@ -1,239 +1,363 @@
-<!-- ── Navbar ──────────────────────────────────────────────── -->
-<nav class="nav" [class.nav--solid]="scrolled()">
-  <div class="nav__inner">
-    <a routerLink="/" class="nav__brand">
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-        <rect width="30" height="30" rx="8" fill="url(#ng)"/>
-        <path d="M8 15l5-7.5 5 7.5-5 7.5-5-7.5z" fill="white" opacity="0.95"/>
-        <path d="M15 10l5-2.5v15L15 20V10z" fill="white" opacity="0.5"/>
-        <defs>
-          <linearGradient id="ng" x1="0" y1="0" x2="30" y2="30">
-            <stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <span>GenZ Studio</span>
+<!-- ══════════════════════════════════════════════════════════
+  HEADER / NAVBAR
+══════════════════════════════════════════════════════════ -->
+<nav class="navbar" [class.navbar--scrolled]="scrolled()">
+  <div class="navbar-wrapper">
+
+    <!-- Brand Logo -->
+    <a routerLink="/" class="brand-logo">
+      <div class="logo-icon-wrap">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="7" fill="#0f172a"/>
+          <path d="M7 14l5.5-8 5.5 8-5.5 8-5.5-8z" fill="#059669"/>
+          <path d="M13.5 9.5L19 7v14l-5.5-2.5V9.5z" fill="white" opacity=".95"/>
+        </svg>
+      </div>
+      <span class="logo-text">GenZ Studio</span>
     </a>
 
-    <div class="nav__links">
-      <a href="#tools">Tools</a>
-      <a href="#how">How it works</a>
-      <a href="#testimonials">Creators</a>
+    <!-- Nav Menu Links -->
+    <div class="nav-menu">
+      <a href="#tools" class="nav-link-item">Tools</a>
+      <a href="#creators" class="nav-link-item">Creators</a>
+      <button class="nav-cta-btn" (click)="openModal('signup')">
+        Get Started <span class="arrow-icon">→</span>
+      </button>
     </div>
 
-    <div class="nav__cta">
-      <a routerLink="/login" class="nav-link">Log in</a>
-      <a routerLink="/register" class="nav-pill">Start free →</a>
-    </div>
-
-    <button class="nav__burger" (click)="mobileOpen.set(!mobileOpen())" aria-label="Menu">
-      <span></span><span></span><span></span>
+    <!-- Mobile menu toggle -->
+    <button class="nav-mobile-btn" (click)="mobileOpen.set(!mobileOpen())" aria-label="toggle menu">
+      <span [class.is-x]="mobileOpen()"></span>
+      <span [class.is-x2]="mobileOpen()"></span>
     </button>
+
   </div>
 
   @if (mobileOpen()) {
-    <div class="nav__mobile">
-      <a href="#tools" (click)="mobileOpen.set(false)">Tools</a>
-      <a href="#how" (click)="mobileOpen.set(false)">How it works</a>
-      <a href="#testimonials" (click)="mobileOpen.set(false)">Creators</a>
-      <a routerLink="/login" class="nav-link">Log in</a>
-      <a routerLink="/register" class="nav-pill">Start free →</a>
+    <div class="nav-mobile-menu">
+      <a href="#tools"    (click)="mobileOpen.set(false)">Tools</a>
+      <a href="#creators" (click)="mobileOpen.set(false)">Creators</a>
+      <button (click)="mobileOpen.set(false); openModal('signup')">Get Started →</button>
     </div>
   }
 </nav>
 
-<!-- ── Hero ────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="hero__noise"></div>
-  <div class="hero__glow hero__glow--1"></div>
-  <div class="hero__glow hero__glow--2"></div>
 
-  <div class="hero__inner">
-    <div class="hero__tag">
-      <span class="hero__tag-dot"></span>
-      Built for the next generation of creators
-    </div>
-
-    <h1 class="hero__h1">
-      One studio.<br/>
-      <span class="hero__h1-grad">Every tool you need.</span>
-    </h1>
-
-    <p class="hero__p">
-      Thumbnails, banners, logos, AI videos, scripts, music — everything a content creator needs, powered by AI. No subscriptions to 10 different apps.
-    </p>
-
-    <div class="hero__btns">
-      <a routerLink="/register" class="hero-btn hero-btn--primary">
-        Start creating for free
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-      <a routerLink="/login" class="hero-btn hero-btn--ghost">Sign in</a>
-    </div>
-
-    <div class="hero__proof">
-      <div class="proof-avatars">
-        <div class="proof-av" style="background:linear-gradient(135deg,#7C3AED,#06B6D4)">P</div>
-        <div class="proof-av" style="background:linear-gradient(135deg,#EF4444,#F59E0B)">M</div>
-        <div class="proof-av" style="background:linear-gradient(135deg,#10B981,#06B6D4)">A</div>
-        <div class="proof-av" style="background:linear-gradient(135deg,#EC4899,#8B5CF6)">J</div>
+<!-- ══════════════════════════════════════════════════════════
+  HERO SECTION (FLAWLESS VERTICAL ALIGNMENT & Snappy Slider)
+══════════════════════════════════════════════════════════ -->
+<section class="section_hero fade-in-up">
+  <div class="hero_grid_bg"></div>
+  <div class="hero_glow_bg"></div>
+  
+  <div class="hero_container">
+    <div class="hero_content">
+      <div class="hero_badge">AI-Powered Creator Platform</div>
+      
+      <!-- Perfectly centered vertical rolling carousels with individual active opacity flags to prevent bleeding -->
+      <h1 class="hero_title">
+        <div class="title-row">
+          <span>We turn</span>
+          <span class="slider-box is-a">
+            <span class="slider-track" [style.transform]="'translateY(calc(-1.2em * ' + heroIdx() + '))'">
+              @for (w of heroA; track w; let idx = $index) {
+                <span class="slide-item" [class.is-active]="idx === heroIdx()">{{ w }}</span>
+              }
+            </span>
+          </span>
+        </div>
+        <div class="title-row">
+          <span>into</span>
+          <span class="slider-box is-b">
+            <span class="slider-track" [style.transform]="'translateY(calc(-1.2em * ' + heroIdx() + '))'">
+              @for (w of heroB; track w; let idx = $index) {
+                <span class="slide-item" [class.is-active]="idx === heroIdx()">{{ w }}</span>
+              }
+            </span>
+          </span>
+        </div>
+      </h1>
+      
+      <!-- Subtitle description content & active tools morphing banner removed as requested by the user -->
+      
+      <div class="hero_actions">
+        <button class="hero_btn_primary" (click)="openModal('signup')">Start Creating Free</button>
+        <button class="hero_btn_secondary" (click)="openModal('signin')">Sign In</button>
       </div>
-      <p><strong>500k+</strong> creators already using GenZ Studio</p>
-    </div>
-  </div>
 
-  <!-- Floating tool cards -->
-  <div class="hero__cards">
-    <div class="hcard hcard--1">
-      <div class="hcard__icon" style="background:#f5f3ff;color:#7C3AED">◈</div>
-      <div>
-        <p class="hcard__title">Logo Generated</p>
-        <p class="hcard__sub">3 variations · 2s</p>
-      </div>
-    </div>
-    <div class="hcard hcard--2">
-      <div class="hcard__icon" style="background:#fef2f2;color:#EF4444">▶</div>
-      <div>
-        <p class="hcard__title">Banner Ready</p>
-        <p class="hcard__sub">2560×1440px</p>
-      </div>
-    </div>
-    <div class="hcard hcard--3">
-      <div class="hcard__icon" style="background:#fff7ed;color:#F97316">▣</div>
-      <div>
-        <p class="hcard__title">CTR +240%</p>
-        <p class="hcard__sub">vs old thumbnail</p>
-      </div>
-    </div>
-    <div class="hcard hcard--4">
-      <div class="hcard__icon" style="background:#f0fdf4;color:#10B981">✧</div>
-      <div>
-        <p class="hcard__title">Script Written</p>
-        <p class="hcard__sub">800 words · 4s</p>
-      </div>
     </div>
   </div>
 </section>
 
-<!-- ── Tools Grid ───────────────────────────────────────────── -->
-<section class="tools-section" id="tools">
-  <div class="container">
-    <div class="section-label">11 Powerful Tools</div>
-    <h2 class="section-h2">Everything in one place</h2>
-    <p class="section-p">Stop juggling apps. GenZ Studio gives you every tool a creator needs — all connected, all AI-powered.</p>
 
-    <div class="tools-grid">
+<!-- ══════════════════════════════════════════════════════════
+  OUR TOOLS SECTION
+══════════════════════════════════════════════════════════ -->
+<section id="tools" class="section_tools fade-in-up">
+  <div class="container_inner">
+    <div class="section_header">
+      <span class="section_subtitle">Powerful Features</span>
+      <h2 class="section_title">Everything You Need To Create</h2>
+      <p class="section_desc">Skip paying for multiple separate subscriptions. GenZ Studio brings all your creative tools under a single optimized platform.</p>
+    </div>
+
+    <div class="tools_grid">
       @for (t of tools; track t.label) {
-        <a routerLink="/register" class="tool-card">
-          <div class="tool-card__icon" [style.background]="t.color + '18'" [style.color]="t.color">{{ t.icon }}</div>
-          <div class="tool-card__body">
-            <span class="tool-card__name">{{ t.label }}</span>
-            <span class="tool-card__desc">{{ t.desc }}</span>
+        <div class="tool_card" [style.--t-color]="t.color">
+          <div class="tool_icon_box" [style.background-color]="t.color + '15'">
+            <span class="tool_icon" [style.color]="t.color">{{ t.icon }}</span>
           </div>
-          <svg class="tool-card__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      }
-    </div>
-  </div>
-</section>
-
-<!-- ── How it works ─────────────────────────────────────────── -->
-<section class="how-section" id="how">
-  <div class="container">
-    <div class="section-label">How it works</div>
-    <h2 class="section-h2">From idea to published in minutes</h2>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step__num">01</div>
-        <h3 class="step__title">Pick your tool</h3>
-        <p class="step__desc">Choose from 11 creator tools — thumbnails, banners, logos, scripts, music, and more.</p>
-      </div>
-      <div class="step__connector"></div>
-      <div class="step">
-        <div class="step__num">02</div>
-        <h3 class="step__title">Describe your vision</h3>
-        <p class="step__desc">Type a prompt or fill in a few fields. Our AI understands creator context and brand voice.</p>
-      </div>
-      <div class="step__connector"></div>
-      <div class="step">
-        <div class="step__num">03</div>
-        <h3 class="step__title">Export & publish</h3>
-        <p class="step__desc">Download in any format or publish directly to YouTube, Instagram, and TikTok.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Testimonials ─────────────────────────────────────────── -->
-<section class="testimonials-section" id="testimonials">
-  <div class="container">
-    <div class="section-label">Creator Stories</div>
-    <h2 class="section-h2">Real creators. Real results.</h2>
-
-    <div class="testimonials-grid">
-      @for (t of testimonials; track t.handle) {
-        <div class="tcard">
-          <p class="tcard__text">"{{ t.text }}"</p>
-          <div class="tcard__author">
-            <div class="tcard__avatar" [style.background]="t.color">{{ t.avatar }}</div>
-            <div>
-              <p class="tcard__name">{{ t.name }}</p>
-              <p class="tcard__handle">{{ t.handle }}</p>
-            </div>
-          </div>
+          <h3 class="tool_title">{{ t.label }}</h3>
+          <p class="tool_desc">{{ t.desc }}</p>
+          <a class="tool_action_link" (click)="openModal('signup')">
+            Try Tool <span class="arrow">→</span>
+          </a>
         </div>
       }
     </div>
   </div>
 </section>
 
-<!-- ── Final CTA ────────────────────────────────────────────── -->
-<section class="final-cta">
-  <div class="final-cta__glow"></div>
-  <div class="container final-cta__inner">
-    <div class="final-cta__tag">Free to start · No credit card</div>
-    <h2 class="final-cta__h2">Your creative studio awaits.</h2>
-    <p class="final-cta__p">Join 500,000+ creators who stopped paying for 10 different tools.</p>
-    <a routerLink="/register" class="hero-btn hero-btn--primary">Create your free account →</a>
+
+<!-- ══════════════════════════════════════════════════════════
+  CREATORS & STATS SECTION
+══════════════════════════════════════════════════════════ -->
+<section id="creators" class="section_creators fade-in-up">
+  <div class="container_inner">
+    <div class="section_header">
+      <span class="section_subtitle">Platform Metrics</span>
+      <h2 class="section_title">Loved by Creators Worldwide</h2>
+      <p class="section_desc">See the impact digital creators and startups are making with our AI toolchain.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats_row_grid">
+      @for (s of stats; track s.label) {
+        <div class="stat_card">
+          <div class="stat_val">{{ s.value }}</div>
+          <div class="stat_label">{{ s.label }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- Testimonials Grid -->
+    <div class="testimonials_grid">
+      @for (t of testimonials; track t.handle) {
+        <div class="testimonial_card">
+          <div class="t_stars">★★★★★</div>
+          <p class="t_quote">"{{ t.text }}"</p>
+          <div class="t_user">
+            <div class="t_avatar" [style.background]="t.c">{{ t.av }}</div>
+            <div class="t_meta">
+              <div class="t_name">{{ t.name }}</div>
+              <div class="t_handle">{{ t.handle }}</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
   </div>
 </section>
 
-<!-- ── Footer ───────────────────────────────────────────────── -->
-<footer class="footer">
-  <div class="footer__inner">
-    <div class="footer__brand">
-      <a routerLink="/" class="nav__brand">
-        <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
-          <rect width="30" height="30" rx="8" fill="url(#fg)"/>
-          <path d="M8 15l5-7.5 5 7.5-5 7.5-5-7.5z" fill="white" opacity="0.95"/>
-          <path d="M15 10l5-2.5v15L15 20V10z" fill="white" opacity="0.5"/>
-          <defs><linearGradient id="fg" x1="0" y1="0" x2="30" y2="30"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
-        </svg>
-        <span>GenZ Studio</span>
-      </a>
-      <p>The all-in-one creative studio for content creators.</p>
+
+<!-- ══════════════════════════════════════════════════════════
+  CLEAN BRAND MARQUEE BANNER
+══════════════════════════════════════════════════════════ -->
+<section class="section_marquee_banner fade-in-up">
+  <div class="marquee_track">
+    <div class="marquee_inner">
+      <span>GENZ STUDIO &bull; </span>
+      <span>GENZ STUDIO &bull; </span>
+      <span>GENZ STUDIO &bull; </span>
+      <span>GENZ STUDIO &bull; </span>
     </div>
-    <div class="footer__cols">
-      <div class="footer__col">
-        <h4>Tools</h4>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+  FOOTER
+══════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer_top">
+    <div class="footer_brand">
+      <a routerLink="/" class="footer_logo_link">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="#0f172a"/>
+          <path d="M7 14l5.5-8 5.5 8-5.5 8-5.5-8z" fill="#059669"/>
+          <path d="M13.5 9.5L19 7v14l-5.5-2.5V9.5z" fill="white" opacity=".95"/>
+        </svg>
+        <span class="footer_logo_text">GenZ Studio</span>
+      </a>
+      <p class="footer_pitch">The modern AI-powered workspace engineered to accelerate digital asset generation, script writing, video timelines, and social media scheduling.</p>
+    </div>
+
+    <div class="footer_links_grid">
+      <div class="footer_col">
+        <h4>Workspace Tools</h4>
         <a href="#tools">Logo Generator</a>
-        <a href="#tools">Thumbnail Maker</a>
-        <a href="#tools">AI Content</a>
-        <a href="#tools">Music Library</a>
+        <a href="#tools">Thumbnail Creator</a>
+        <a href="#tools">Video Timeline Editor</a>
+        <a href="#tools">Sound Library</a>
+        <a href="#tools">AI Scriptwriter</a>
       </div>
-      <div class="footer__col">
+      <div class="footer-col">
         <h4>Product</h4>
-        <a href="#">Pricing</a>
-        <a href="#">Changelog</a>
-        <a href="#">Roadmap</a>
+        <a href="#about">About Workspace</a>
+        <button (click)="openModal('signup')">Get Started</button>
+        <button (click)="openModal('signin')">Sign In</button>
       </div>
-      <div class="footer__col">
+      <div class="footer-col">
         <h4>Legal</h4>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms &amp; Conditions</a>
       </div>
     </div>
   </div>
-  <div class="footer__bottom">© 2025 GenZ Studio. All rights reserved.</div>
+
+  <div class="footer_bottom">
+    <span class="copy_text">© 2026 GenZ Studio. All rights reserved. Made by digital creators.</span>
+  </div>
 </footer>
+
+
+<!-- ══════════════════════════════════════════════════════════
+  MODAL (CENTERED POPUP)
+══════════════════════════════════════════════════════════ -->
+@if (modalOpen()) {
+<div class="popup-wrapper is-open" (click)="onOverlayClick($event)">
+
+  <div class="popup-inner">
+    <div class="popup-content-wrapper">
+
+      <!-- Close btn -->
+      <button class="popup-close" (click)="closeModal()" aria-label="close modal">
+        <span class="popup-close-icon">
+          <svg viewBox="0 0 14 14" fill="none">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </button>
+
+      <div class="popup-content">
+        <!-- Left info card -->
+        <div class="popup-left-panel">
+          <div class="plp-body">
+            <svg width="36" height="36" viewBox="0 0 28 28" fill="none">
+              <rect width="28" height="28" rx="6" fill="#0f172a"/>
+              <path d="M7 14l5.5-8 5.5 8-5.5 8-5.5-8z" fill="#059669"/>
+              <path d="M13.5 9.5L19 7v14l-5.5-2.5V9.5z" fill="white" opacity=".95"/>
+            </svg>
+            <h2 class="plp-title">
+              {{ authTab() === 'signin' ? 'Welcome back, creator.' : 'Start creating for free.' }}
+            </h2>
+            <p class="plp-sub">
+              Sign in to continue creating vector graphics, scripts, and editing videos.
+            </p>
+            <ul class="plp-perks">
+              <li><span class="perk-check">✓</span> 11 AI creator tools</li>
+              <li><span class="perk-check">✓</span> 100k+ royalty-free music</li>
+              <li><span class="perk-check">✓</span> High-speed rendering</li>
+              <li><span class="perk-check">✓</span> Free exports forever</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right form panel -->
+        <div class="popup-right-panel">
+
+          <div class="popup-tabs">
+            <button class="ptab" [class.active]="authTab()==='signin'"  (click)="setTab('signin')">Sign In</button>
+            <button class="ptab" [class.active]="authTab()==='signup'"  (click)="setTab('signup')">Create Account</button>
+          </div>
+
+          <div class="popup-form-head">
+            <h3>{{ authTab()==='signin' ? 'Sign in' : 'Create free account' }}</h3>
+            <p>{{ authTab()==='signin' ? 'Enter credentials to enter your studio.' : 'Takes less than 60 seconds.' }}</p>
+          </div>
+
+          <button class="google-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <div class="popup-or"><span>or</span></div>
+
+          @if (srvErr()) { <div class="ferr-banner">{{ srvErr() }}</div> }
+
+          <form (submit)="submit($event)" class="main-form">
+
+            @if (authTab()==='signup') {
+              <div class="field" [class.has-err]="nameErr()">
+                <label class="label small-size">Full Name*</label>
+                <input class="form-field" type="text" placeholder="Enter your full name"
+                       [value]="fullName()" (input)="onName($event)" autocomplete="name"/>
+                @if (nameErr()) { <span class="fe">{{ nameErr() }}</span> }
+              </div>
+            }
+
+            <div class="field" [class.has-err]="emailErr()">
+              <label class="label small-size">Email address*</label>
+              <input class="form-field" type="email" placeholder="Enter your email"
+                     [value]="email()" (input)="onEmail($event)" autocomplete="email"/>
+              @if (emailErr()) { <span class="fe">{{ emailErr() }}</span> }
+            </div>
+
+            <div class="field" [class.has-err]="passErr()">
+              <div class="field-label-row">
+                <label class="label small-size">Password*</label>
+                @if (authTab()==='signin') { <a href="#" class="field-forgot">Forgot?</a> }
+              </div>
+              <input class="form-field" type="password" placeholder="••••••••"
+                     [value]="password()" (input)="onPass($event)" autocomplete="current-password"/>
+              @if (passErr()) { <span class="fe">{{ passErr() }}</span> }
+            </div>
+
+            @if (authTab()==='signup' && password()) {
+              <div class="strength-row">
+                <div class="sr-labels">
+                  <span>Strength</span>
+                  <span class="sr-label {{ strength().cls }}">{{ strength().label }}</span>
+                </div>
+                <div class="sr-track"><div class="sr-fill {{ strength().cls }}" [style.width.%]="strength().score"></div></div>
+              </div>
+            }
+
+            @if (authTab()==='signup') {
+              <label class="checkbox-field">
+                <input type="checkbox" [checked]="agreeTerms()" (change)="onTerms($event)" class="checkbox"/>
+                <span class="checkbox-text">I agree to <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></span>
+              </label>
+              @if (termsErr()) { <span class="fe">{{ termsErr() }}</span> }
+            }
+
+            <button type="submit" class="submit-button spacing" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner"></span> Processing…
+              } @else {
+                {{ authTab()==='signin' ? 'Sign In' : 'Create Account' }}
+              }
+            </button>
+          </form>
+
+          <p class="popup-switch">
+            @if (authTab()==='signin') {
+              No account? <button (click)="setTab('signup')">Create one free</button>
+            } @else {
+              Have an account? <button (click)="setTab('signin')">Sign in</button>
+            }
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+}
