@@ -1,19 +1,34 @@
-# Routing
+# Frontend Routing
 
-The app should use route-driven features rather than a single large page.
+## Overview
 
-## Suggested Route Groups
+GenZ Studio uses Angular Router with standalone components for client-side navigation. Routes follow a feature-based structure organized by public, auth, and workspace areas.
 
-- Landing and authentication views.
-- Creation workspace views.
-- Asset management views.
-- Account and settings views.
+## Current Routes
 
-## Routing Guidelines
+### Public Routes
 
-- Keep route components small.
-- Load feature code lazily when the route is not part of the critical path.
-- Prefer route-level guards for auth-protected areas.
+- `/` → Redirects to `/home`
+- `/home` - Public landing page
+- `/login` - User login
+- `/register` - User registration
+
+### Protected Routes (Workspace)
+
+- `/workspace/dashboard` - Main dashboard with stats and recent projects
+- `/workspace/projects` - Project management interface
+- `/workspace/ai-tools` - AI tools gallery
+
+## Route Configuration
+
+Routes are defined in `app/app.routes.ts` using standalone component routing. The layout is managed by `WorkspaceLayoutComponent` which wraps protected workspace routes.
+
+## Best Practices
+
+- Keep routes feature-based.
+- Use the layout wrapper for authenticated pages.
+- Lazy load feature components where appropriate.
+- Use route guards for access control.
 # Frontend Routing
 
 ## Overview

@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'gz-login',
@@ -8,19 +9,17 @@ import { RouterLink, Router } from '@angular/router';
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class LoginComponent {
+export class LoginPage {
   protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly showPassword = signal(false);
   protected readonly rememberMe = signal(false);
   protected readonly isSubmitting = signal(false);
-  
-  // Validation errors
   protected readonly emailError = signal('');
   protected readonly passwordError = signal('');
   protected readonly serverError = signal('');
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
   protected onEmailInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -55,12 +54,15 @@ export class LoginComponent {
 
     this.isSubmitting.set(true);
 
-    // Simulate login API call
+    // Simulate login — replace with real API call
     setTimeout(() => {
+      this.auth.login(
+        { id: '1', fullName: 'Sanjay', email: this.email() },
+        'mock-access-token'
+      );
       this.isSubmitting.set(false);
-      // Navigate to app dashboard
-      this.router.navigate(['/app/dashboard']);
-    }, 1200);
+      this.router.navigate(['/workspace/dashboard']);
+    }, 1000);
   }
 
   private validateEmail(value: string): boolean {

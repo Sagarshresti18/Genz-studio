@@ -1,6 +1,6 @@
 # Backend Architecture
 
-The backend is a TypeScript Express API that starts small and grows by layering routes, services, and database helpers around a shared HTTP application.
+The backend is a JavaScript Express API that starts small and grows by layering routes, services, and database helpers around a shared HTTP application.
 
 ## Architecture Goals
 
@@ -11,21 +11,21 @@ The backend is a TypeScript Express API that starts small and grows by layering 
 
 ## Runtime Flow
 
-1. `src/server.ts` loads the configured port and creates the HTTP server.
-2. `src/app.ts` creates the Express instance, installs middleware, and mounts routes.
-3. `src/config/env.ts` loads environment variables from the repo root `.env` first, then `server/.env` if present, and validates them with `zod`.
-4. `src/config/database.ts` creates a lazy `pg` pool only when `DATABASE_URL` exists.
-5. `src/routes/health.ts` exposes API and database health checks so the deployment can verify readiness.
-6. `src/middleware/errorHandler.ts` handles 404 and unexpected errors in one place.
+1. `src/server.js` loads the configured port and creates the HTTP server.
+2. `src/app.js` creates the Express instance, installs middleware, and mounts routes.
+3. `src/config/env.js` loads environment variables from the repo root `.env` first, then `server/.env` if present, and validates them with `zod`.
+4. `src/config/database.js` creates a lazy `pg` pool only when `DATABASE_URL` exists.
+5. `src/routes/health.js` exposes API and database health checks so the deployment can verify readiness.
+6. `src/middleware/errorHandler.js` handles 404 and unexpected errors in one place.
 
 ## Current Backend Layers
 
-- `src/server.ts` owns process startup, shutdown, and signal handling.
-- `src/app.ts` owns Express middleware, route mounting, and response formatting.
-- `src/config/env.ts` owns environment parsing and validation.
-- `src/config/database.ts` owns the PostgreSQL pool and connection probing.
-- `src/routes/health.ts` owns the current health endpoints under `/api/health`.
-- `src/middleware/errorHandler.ts` owns the fallback HTTP responses.
+- `src/server.js` owns process startup, shutdown, and signal handling.
+- `src/app.js` owns Express middleware, route mounting, and response formatting.
+- `src/config/env.js` owns environment parsing and validation.
+- `src/config/database.js` owns the PostgreSQL pool and connection probing.
+- `src/routes/health.js` owns the current health endpoints under `/health`.
+- `src/middleware/errorHandler.js` owns the fallback HTTP responses.
 
 ## Request Pipeline
 
@@ -36,7 +36,7 @@ The current request pipeline is intentionally simple:
 - Response compression is enabled with `compression`.
 - Cookies and request payloads are parsed before route handlers run.
 - Request logging is handled by `morgan`.
-- Routes are mounted under the `/api` prefix.
+- Routes are mounted at the root level.
 - Unknown routes fall through to a shared 404 handler.
 - Unexpected failures are returned through a single error handler.
 
@@ -46,7 +46,7 @@ The current request pipeline is intentionally simple:
 - The PostgreSQL pool is created lazily so the server can start even if the database is not yet configured.
 - `DATABASE_URL` is the only database connection value required for Neon.
 - In production, SSL is enabled with `rejectUnauthorized: false` so Neon-compatible TLS connections work correctly.
-- The `/api/health/db` endpoint performs a lightweight `SELECT 1` check to confirm connectivity.
+- The `/health/db` endpoint performs a lightweight `SELECT 1` check to confirm connectivity.
 - Startup is decoupled from database readiness, which keeps local development and deployment more flexible.
 
 ## Environment Variables

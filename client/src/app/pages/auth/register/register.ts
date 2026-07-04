@@ -1,5 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'gz-register',
@@ -8,7 +9,7 @@ import { RouterLink, Router } from '@angular/router';
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
-export class RegisterComponent {
+export class RegisterPage {
   protected readonly fullName = signal('');
   protected readonly email = signal('');
   protected readonly password = signal('');
@@ -41,7 +42,7 @@ export class RegisterComponent {
     return { score: 100, label: 'Strong', colorClass: 'strong' };
   });
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
   protected onFullNameInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -96,12 +97,15 @@ export class RegisterComponent {
 
     this.isSubmitting.set(true);
 
-    // Simulate Register API
+    // Simulate register — replace with real API call
     setTimeout(() => {
+      this.auth.login(
+        { id: '1', fullName: this.fullName(), email: this.email() },
+        'mock-access-token'
+      );
       this.isSubmitting.set(false);
-      // Navigate to app onboarding/dashboard
-      this.router.navigate(['/app/dashboard']);
-    }, 1500);
+      this.router.navigate(['/workspace/dashboard']);
+    }, 1200);
   }
 
   private validateFullName(value: string): boolean {

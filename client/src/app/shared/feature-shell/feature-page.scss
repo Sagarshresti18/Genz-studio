@@ -1,0 +1,134 @@
+// Shared feature page styles
+.feature-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+}
+
+.feature-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 56px 40px 48px;
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  text-align: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 65%);
+    pointer-events: none;
+  }
+}
+
+.feature-hero__glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 15%, transparent), transparent 70%);
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+.feature-hero__icon {
+  position: relative;
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.feature-hero__badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.feature-hero__title {
+  position: relative;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+
+.feature-hero__sub {
+  position: relative;
+  font-size: 1rem;
+  color: #64748b;
+  max-width: 52ch;
+  margin: 0 auto 28px;
+  line-height: 1.7;
+}
+
+.feature-hero__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 28px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+
+  &:hover {
+    opacity: 0.88;
+    transform: translateY(-2px);
+  }
+}
+
+// Placeholder grid
+.feature-placeholder {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ph-card {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ph-thumb {
+  height: 130px;
+}
+
+.ph-line {
+  height: 10px;
+  border-radius: 5px;
+  background: #f1f5f9;
+  margin: 14px 14px 0;
+
+  &--lg { width: 70%; }
+  &--sm { width: 45%; margin-bottom: 14px; }
+}
+
+@media (max-width: 768px) {
+  .feature-placeholder { grid-template-columns: repeat(2, 1fr); }
+  .feature-hero { padding: 40px 24px 36px; }
+}
+
+@media (max-width: 480px) {
+  .feature-placeholder { grid-template-columns: 1fr; }
+}

@@ -1,88 +1,79 @@
 import { Routes } from '@angular/router';
+import { authGuard, publicGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'landing',
-    pathMatch: 'full'
-  },
-  {
-    path: 'landing',
-    loadComponent: () => import('./pages/landing/landing').then(m => m.Landing)
+    loadComponent: () => import('./pages/landing/landing').then(m => m.LandingPage)
   },
   {
     path: 'login',
-    loadComponent: () => import('./pages/auth/login/login').then(m => m.LoginComponent)
+    canActivate: [publicGuard],
+    loadComponent: () => import('./pages/auth/login/login').then(m => m.LoginPage)
   },
   {
     path: 'register',
-    loadComponent: () => import('./pages/auth/register/register').then(m => m.RegisterComponent)
+    canActivate: [publicGuard],
+    loadComponent: () => import('./pages/auth/register/register').then(m => m.RegisterPage)
   },
   {
-    path: 'app',
-    loadComponent: () => import('./layout/layout').then(m => m.LayoutComponent),
+    path: 'workspace',
+    canActivate: [authGuard],
+    loadComponent: () => import('./layout/layout').then(m => m.WorkspaceLayoutComponent),
     children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardPage)
+      },
+      // ── Design Tools ──────────────────────────────────────
+      {
+        path: 'logo-generator',
+        loadComponent: () => import('./pages/logo-generator/logo-generator').then(m => m.LogoGeneratorPage)
       },
       {
-        path: 'projects',
-        loadComponent: () => import('./pages/projects/projects').then(m => m.ProjectsComponent)
+        path: 'youtube-banner',
+        loadComponent: () => import('./pages/youtube-banner/youtube-banner').then(m => m.YoutubeBannerPage)
       },
       {
-        path: 'ai-tools',
-        loadComponent: () => import('./pages/ai-tools/ai-tools').then(m => m.AIToolsComponent)
+        path: 'thumbnail-maker',
+        loadComponent: () => import('./pages/thumbnail-maker/thumbnail-maker').then(m => m.ThumbnailMakerPage)
       },
       {
-        path: 'templates',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
+        path: 'image-editor',
+        loadComponent: () => import('./pages/image-editor/image-editor').then(m => m.ImageEditorPage)
+      },
+      // ── Video & Audio ─────────────────────────────────────
+      {
+        path: 'video-editor',
+        loadComponent: () => import('./pages/video-editor/video-editor').then(m => m.VideoEditorPage)
       },
       {
-        path: 'design-tools',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
+        path: 'ai-videos',
+        loadComponent: () => import('./pages/ai-videos/ai-videos').then(m => m.AiVideosPage)
       },
       {
-        path: 'brand-kit',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
+        path: 'ai-audio',
+        loadComponent: () => import('./pages/ai-audio/ai-audio').then(m => m.AiAudioPage)
       },
       {
-        path: 'media-library',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
+        path: 'music-library',
+        loadComponent: () => import('./pages/music-library/music-library').then(m => m.MusicLibraryPage)
+      },
+      // ── AI & Content ──────────────────────────────────────
+      {
+        path: 'ai-content',
+        loadComponent: () => import('./pages/ai-content/ai-content').then(m => m.AiContentPage)
       },
       {
-        path: 'calendar',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
+        path: 'content-calendar',
+        loadComponent: () => import('./pages/content-calendar/content-calendar').then(m => m.ContentCalendarPage)
       },
       {
-        path: 'analytics',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
+        path: 'meme-library',
+        loadComponent: () => import('./pages/meme-library/meme-library').then(m => m.MemeLibraryPage)
       },
-      {
-        path: 'creator-hub',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
-      },
-      {
-        path: 'marketplace',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
-      },
-      {
-        path: 'community',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
-      },
-      {
-        path: 'settings',
-        loadComponent: () => import('./pages/placeholder/placeholder').then(m => m.PlaceholderComponent)
-      }
     ]
   },
-  {
-    path: '**',
-    redirectTo: 'landing'
-  }
+  { path: '**', redirectTo: '' }
 ];

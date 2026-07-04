@@ -3,36 +3,37 @@
 // ============================================================
 
 // ── Google Fonts ─────────────────────────────────────────────
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 // ── Design Tokens (CSS Custom Properties) ────────────────────
 :root {
   // Brand
-  --brand-primary: #6C5CE7;
-  --brand-primary-hover: #7E70F0;
-  --brand-primary-rgb: 108, 92, 231;
-  --brand-secondary: #00D2FF;
-  --brand-secondary-rgb: 0, 210, 255;
-  --brand-accent: #FF6B9D;
-  --brand-accent-rgb: 255, 107, 157;
+  --brand-primary: #7C3AED;
+  --brand-primary-hover: #6D28D9;
+  --brand-primary-rgb: 124, 58, 237;
+  --brand-secondary: #06B6D4;
+  --brand-secondary-rgb: 6, 182, 212;
+  --brand-accent: #F59E0B;
+  --brand-accent-rgb: 245, 158, 11;
 
   // Backgrounds
-  --bg-base: #0A0A0F;
-  --bg-surface: #12121A;
-  --bg-elevated: #1A1A28;
-  --bg-hover: #1E1E2E;
-  --bg-active: #252540;
-  --bg-input: #16162A;
+  --bg-base: #f5f7fb;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f8fafc;
+  --bg-hover: #eef4ff;
+  --bg-active: #dbeafe;
+  --bg-input: #f8fafc;
 
   // Borders
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.16);
-  --border-focus: #6C5CE7;
+  --border-default: #e5e7eb;
+  --border-hover: #cbd5e1;
+  --border-focus: #2563eb;
 
   // Text
-  --text-primary: #F0F0F5;
-  --text-secondary: #A0A0B8;
-  --text-tertiary: #6B6B80;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
 
   // Status
   --success: #00E676;
@@ -41,9 +42,9 @@
   --info: #40C4FF;
 
   // Glass
-  --glass-bg: rgba(18, 18, 26, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: 24px;
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(148, 163, 184, 0.18);
+  --glass-blur: 18px;
 
   // Spacing
   --space-1: 4px;
@@ -91,13 +92,13 @@
   --letter-spacing-wider: 0.08em;
 
   // Shadows
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
-  --shadow-glow-primary: 0 0 24px rgba(108, 92, 231, 0.3);
-  --shadow-glow-secondary: 0 0 24px rgba(0, 210, 255, 0.3);
-  --shadow-glow-accent: 0 0 24px rgba(255, 107, 157, 0.3);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 24px 56px rgba(15, 23, 42, 0.16);
+  --shadow-glow-primary: 0 12px 32px rgba(37, 99, 235, 0.16);
+  --shadow-glow-secondary: 0 12px 32px rgba(15, 118, 110, 0.16);
+  --shadow-glow-accent: 0 12px 32px rgba(249, 115, 22, 0.16);
 
   // Transitions
   --transition-fast: 120ms ease;
@@ -118,7 +119,7 @@
   --z-modal: 400;
   --z-toast: 500;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 // ── CSS Reset / Normalize ────────────────────────────────────
@@ -142,7 +143,7 @@ html {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-normal);
@@ -217,25 +218,25 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(37, 99, 235, 0.18);
   border-radius: var(--radius-full);
   transition: background var(--transition-base);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(37, 99, 235, 0.32);
   }
 }
 
 // Firefox
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: rgba(37, 99, 235, 0.18) transparent;
 }
 
 // ── Selection ────────────────────────────────────────────────
 ::selection {
-  background: rgba(108, 92, 231, 0.4);
-  color: #fff;
+  background: rgba(37, 99, 235, 0.16);
+  color: var(--text-primary);
 }
 
 // ── Focus Visible ────────────────────────────────────────────
@@ -243,6 +244,14 @@ p {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 // ── Typography Utility Classes ───────────────────────────────

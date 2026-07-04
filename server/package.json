@@ -2,12 +2,12 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "clean": "rmdir /s /q dist"
+    "dev": "node --watch src/server.js",
+    "build": "node -e \"const fs=require('fs'); fs.rmSync('dist',{recursive:true,force:true}); fs.mkdirSync('dist',{recursive:true}); fs.cpSync('src','dist',{recursive:true});\"",
+    "start": "node src/server.js",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "keywords": [],
   "author": "",
@@ -24,19 +24,5 @@
     "morgan": "^1.11.0",
     "pg": "^8.16.3",
     "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/compression": "^1.8.1",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10",
-    "@types/node": "^26.1.0",
-    "@types/pg": "^8.15.5",
-    "nodemon": "^3.1.14",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
   }
 }

@@ -1,23 +1,36 @@
 # Frontend Architecture
 
-The frontend is an Angular application that will consume the backend API and present the creation workflows for GenZ Studio.
+The frontend is an Angular 18+ standalone component application that serves as the user interface for GenZ Studio.
 
 ## Current Entry Points
 
 - `client/src/main.ts` bootstraps the app.
-- `client/src/app/` contains the root app component, routes, config, and styles.
+- `client/src/app/app.ts` is the root component with routing configuration.
+- `client/src/app/app.routes.ts` defines the application routes.
 
 ## Architecture Goals
 
-- Keep feature views isolated by route.
-- Share UI primitives where it improves consistency.
-- Put API access behind a small service layer.
+- Keep feature pages isolated by route.
+- Use standalone components for better tree-shaking.
+- Share CSS variables for consistent theming.
+- Keep API access behind service layers.
 
-## Integration Points
+## UI Theme
 
-- The client should call the backend API under `/api`.
-- API URLs should come from environment configuration.
-- Health endpoints can be used during local development and deployment checks.
+- **Color Palette**: White/light theme with blue primary brand color (#2563eb).
+- **Typography**: Manrope + Inter system font family.
+- **Spacing**: CSS custom properties (--gz-spacing-*).
+- **Components**: Card-based layouts with soft shadows and light borders.
+
+## Current Pages
+
+- **Home** (`/` or `/home`) - Public landing page.
+- **Login** (`/login`) - Authentication entry point.
+- **Register** (`/register`) - Account creation.
+- **Workspace** (`/workspace`) - Protected authenticated area:
+  - Dashboard - Main entry point with stats and tools.
+  - Projects - Visual asset project management.
+  - AI Tools - Gallery of available AI tools.
 # Frontend Architecture
 
 ## Overview

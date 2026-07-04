@@ -2,11 +2,17 @@
 
 An AI-powered creator platform for designing YouTube banners, thumbnails, profile pictures, editing images and videos, and generating AI-powered content—all in one place.
 
+## Architecture
+
+**Backend**: Node.js + Express API (JavaScript, no TypeScript)  
+**Frontend**: Angular 18+ standalone components with white/light UI theme  
+**Database**: PostgreSQL (Neon optional)
+
 ## What This Repo Contains
 
-- `client/` Angular frontend
-- `server/` Node.js + Express backend
-- `docs/` architecture and development notes
+- `client/` - Angular 18+ frontend with standalone components
+- `server/` - Express.js backend in plain JavaScript
+- `docs/` - Architecture and development guides
 
 ## Prerequisites
 

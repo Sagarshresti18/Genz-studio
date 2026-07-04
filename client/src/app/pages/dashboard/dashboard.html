@@ -1,129 +1,119 @@
-<div class="dashboard page-enter">
-  <!-- Welcome Banner -->
-  <div class="welcome-banner glass-card-elevated">
-    <div class="welcome-banner__content">
-      <h1 class="welcome-banner__title">Good evening, {{ creatorName() }}! 👋</h1>
-      <p class="welcome-banner__subtitle">Ready to create something amazing today? You have full access to 22 AI creative tools.</p>
-      <button class="btn btn-primary btn-create" routerLink="/app/projects">
-        Create Project <span class="btn__arrow">→</span>
-      </button>
+<div class="dashboard">
+
+  <!-- ── Welcome ─────────────────────────────────────────── -->
+  <div class="welcome">
+    <div class="welcome__left">
+      <p class="welcome__greeting">{{ greeting() }}, <span class="welcome__name">{{ creatorName() }}</span> 👋</p>
+      <p class="welcome__sub">Here's what's happening with your content today.</p>
     </div>
-    <div class="welcome-banner__visual">
-      <div class="banner-orb banner-orb--1"></div>
-      <div class="banner-orb banner-orb--2"></div>
+    <div class="welcome__actions">
+      <a routerLink="/workspace/thumbnail-maker" class="btn-create">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Create
+      </a>
     </div>
   </div>
 
-  <!-- Stats Grid -->
-  <div class="stats-grid">
-    @for (stat of stats(); track stat.label) {
-      <div class="stat-card glass-card">
-        <div class="stat-card__icon" [class]="'stat-card__icon--' + stat.colorClass">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path [attr.d]="getStatIcon(stat.icon)" />
+  <!-- ── Stats ───────────────────────────────────────────── -->
+  <div class="stats-row">
+    @for (s of stats(); track s.label) {
+      <div class="stat-card">
+        <div class="stat-icon" [style.background]="s.bg" [style.color]="s.color">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path [attr.d]="s.icon"/>
           </svg>
         </div>
-        <div class="stat-card__content">
-          <span class="stat-card__value">{{ stat.value }}</span>
-          <span class="stat-card__label">{{ stat.label }}</span>
+        <div class="stat-body">
+          <span class="stat-value">{{ s.value }}</span>
+          <span class="stat-label">{{ s.label }}</span>
         </div>
-        <div class="stat-card__trend">
-          <span class="trend-text">{{ stat.trend }}</span>
-        </div>
+        <span class="stat-sub">{{ s.sub }}</span>
       </div>
     }
   </div>
 
-  <!-- Main Section Grid -->
-  <div class="main-sections">
-    <!-- Left Column: Projects & Actions -->
-    <div class="sections-column">
-      <!-- Recent Projects -->
-      <div class="dashboard-section glass-card">
-        <div class="section-header">
-          <h2 class="section-title">Recent Projects</h2>
-          <a routerLink="/app/projects" class="section-link">View All →</a>
-        </div>
-        
-        <div class="recent-projects-list">
-          @for (project of recentProjects(); track project.id) {
-            <a routerLink="/app/projects" class="project-item">
-              <div class="project-thumbnail" [style.background]="project.gradient"></div>
-              <div class="project-info">
-                <span class="project-name">{{ project.name }}</span>
-                <span class="project-time">{{ project.timestamp }}</span>
-              </div>
-              <span class="badge" [class]="'badge-' + (project.status === 'Published' ? 'success' : project.status === 'Active' ? 'primary' : 'warning')">
-                {{ project.status }}
-              </span>
-            </a>
-          }
-        </div>
-      </div>
+  <!-- ── Quick Tools ─────────────────────────────────────── -->
+  <div class="section-block">
+    <div class="section-head">
+      <h2 class="section-title">Quick Create</h2>
+      <span class="section-hint">Jump straight into a tool</span>
+    </div>
+    <div class="tools-grid">
+      @for (t of quickTools(); track t.label) {
+        <a [routerLink]="t.route" class="tool-chip">
+          <span class="tool-chip__icon" [style.background]="t.bg" [style.color]="t.color">{{ t.icon }}</span>
+          <span class="tool-chip__label">{{ t.label }}</span>
+        </a>
+      }
+    </div>
+  </div>
 
-      <!-- Quick Actions -->
-      <div class="dashboard-section glass-card">
-        <div class="section-header">
-          <h2 class="section-title">Quick Actions</h2>
-        </div>
-        <div class="quick-actions-grid">
-          @for (action of quickActions(); track action.label) {
-            <a [routerLink]="action.route" class="action-card" [class.action-card--primary]="action.primary">
-              <div class="action-card__icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path [attr.d]="getActionIcon(action.icon)" />
-                </svg>
-              </div>
-              <span class="action-card__label">{{ action.label }}</span>
-            </a>
-          }
-        </div>
+  <!-- ── Main 2-col ──────────────────────────────────────── -->
+  <div class="two-col">
+
+    <!-- Left: Recent Work -->
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">Recent Work</h2>
+        <a routerLink="/workspace/thumbnail-maker" class="card-link">View all →</a>
+      </div>
+      <div class="work-list">
+        @for (w of recentWork(); track w.id) {
+          <div class="work-row">
+            <div class="work-thumb" [style.background]="w.gradient"></div>
+            <div class="work-info">
+              <span class="work-name">{{ w.name }}</span>
+              <span class="work-meta">{{ w.type }} · {{ w.time }}</span>
+            </div>
+            <span class="status-pill" [class]="'status--' + w.status.toLowerCase()">{{ w.status }}</span>
+          </div>
+        }
       </div>
     </div>
 
-    <!-- Right Column: AI Tools & Team Activity -->
-    <div class="sections-column">
-      <!-- AI Tools Spotlight -->
-      <div class="dashboard-section glass-card">
-        <div class="section-header">
-          <h2 class="section-title">Popular AI Tools</h2>
-          <a routerLink="/app/ai-tools" class="section-link">View All →</a>
+    <!-- Right: Trending + Activity -->
+    <div class="right-col">
+
+      <!-- Trending Templates -->
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">🔥 Trending Templates</h2>
         </div>
-        <div class="spotlight-tools">
-          @for (tool of spotlightTools(); track tool.name) {
-            <a routerLink="/app/ai-tools" class="spotlight-tool-card">
-              <span class="tool-icon">{{ tool.icon }}</span>
-              <div class="tool-info">
-                <span class="tool-name">{{ tool.name }}</span>
-                <p class="tool-desc">{{ tool.desc }}</p>
+        <div class="trending-list">
+          @for (t of trending(); track t.name) {
+            <div class="trending-row">
+              <div class="trending-thumb" [style.background]="t.gradient"></div>
+              <div class="trending-info">
+                <span class="trending-name">{{ t.name }}</span>
+                <span class="trending-uses">{{ t.uses }}</span>
               </div>
-              <span class="tool-arrow">→</span>
-            </a>
+              <a routerLink="/workspace/thumbnail-maker" class="use-btn">Use</a>
+            </div>
           }
         </div>
       </div>
 
-      <!-- Performance Overview & Activity -->
-      <div class="dashboard-section glass-card">
-        <div class="section-header">
-          <h2 class="section-title">Activity Feed</h2>
+      <!-- Activity -->
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Activity</h2>
         </div>
-        <div class="activity-feed">
-          @for (act of activities(); track act.target + act.time) {
-            <div class="activity-item">
-              <div class="activity-avatar">{{ act.avatar }}</div>
-              <div class="activity-content">
-                <p class="activity-text">
-                  <span class="font-semibold text-primary">{{ act.user }}</span>
-                  {{ act.action }}
-                  <span class="font-semibold text-primary">"{{ act.target }}"</span>
-                </p>
-                <span class="activity-time">{{ act.time }}</span>
+        <div class="activity-list">
+          @for (a of activities(); track a.time) {
+            <div class="activity-row">
+              <div class="activity-dot" [style.background]="activityColors[a.type]"></div>
+              <div class="activity-body">
+                <p class="activity-text">{{ a.text }}</p>
+                <span class="activity-time">{{ a.time }}</span>
               </div>
             </div>
           }
         </div>
       </div>
+
     </div>
   </div>
+
 </div>

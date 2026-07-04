@@ -10,9 +10,9 @@ GenZ Studio is organized as a two-package workspace with an Angular frontend and
 
 ## Backend
 
-- Node.js runtime.
-- Express 5 for HTTP APIs.
-- TypeScript for server code.
+- Node.js 22+ runtime.
+- Express.js for HTTP APIs.
+- JavaScript (ES6+) for server code.
 - `pg` for PostgreSQL connectivity.
 - `dotenv` and `zod` for environment loading and validation.
 

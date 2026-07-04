@@ -34,15 +34,36 @@ The server also accepts a local `server/.env`, but the root `.env` is the primar
 
 ## Run Locally
 
+### Backend (Node.js + Express)
+
 ```bash
 cd server
 npm run dev
 ```
 
-The API will be available at `http://localhost:8080`.
+The API listens on `http://localhost:${PORT}` (default: 5000).
+
+### Frontend (Angular)
+
+In another terminal:
+
+```bash
+cd client
+ng serve
+```
+
+The app loads at `http://localhost:4200`.
 
 ## Verify
 
-- `GET /api` checks that the API is alive.
-- `GET /api/health` checks the service response.
-- `GET /api/health/db` checks the Neon connection once `DATABASE_URL` is set.
+**Backend API:**
+- `GET /health` - API status
+- `GET /health/db` - Database connection status
+
+**Frontend Routes:**
+- `/` or `/home` - Landing page
+- `/login` - User authentication
+- `/register` - Account creation
+- `/workspace/dashboard` - Main dashboard (requires login)
+- `/workspace/projects` - Project management
+- `/workspace/ai-tools` - AI tools gallery

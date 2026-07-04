@@ -1,49 +1,26 @@
-// ============================================================
-// GenZ Studio — Register Page Styles
-// ============================================================
-
 @use '../login/login.scss' as *;
 
-// ─── Password Strength Meter ────────────────────────────────
 .password-strength-bar {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
   overflow: hidden;
-  margin-top: 6px;
 }
 
 .password-strength-fill {
   height: 100%;
-  width: 0;
   transition: width var(--transition-base), background-color var(--transition-base);
 
-  &.weak {
-    background-color: var(--error);
-  }
-
-  &.medium {
-    background-color: var(--warning);
-  }
-
-  &.strong {
-    background-color: var(--success);
-  }
+  &.weak { background: #ef4444; }
+  &.medium { background: #f59e0b; }
+  &.strong { background: #16a34a; }
 }
 
 .password-strength-label {
+  margin-top: 6px;
   color: var(--text-secondary);
-  margin-top: 4px;
 
-  span.weak {
-    color: var(--error);
-  }
-
-  span.medium {
-    color: var(--warning);
-  }
-
-  span.strong {
-    color: var(--success);
-  }
+  span.weak { color: #ef4444; }
+  span.medium { color: #f59e0b; }
+  span.strong { color: #16a34a; }
 }
