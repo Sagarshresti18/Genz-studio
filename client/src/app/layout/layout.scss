@@ -21,7 +21,8 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: #0f0f1a;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
   z-index: 40;
   transition: width 0.22s cubic-bezier(0.4,0,0.2,1);
   overflow: hidden;
@@ -35,7 +36,7 @@
   justify-content: space-between;
   padding: 18px 14px 14px;
   min-height: 64px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .logo-link {
@@ -52,7 +53,7 @@
 .logo-text {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #f8fafc;
+  color: #0f172a;
   letter-spacing: -0.02em;
 }
 
@@ -86,13 +87,13 @@
   overflow-x: hidden;
 
   &::-webkit-scrollbar { width: 3px; }
-  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.06); border-radius: 3px; }
 }
 
 .nav-group {
   margin-bottom: 2px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid #f1f5f9;
 
   &:last-child { border-bottom: none; }
 }
@@ -104,7 +105,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba(255,255,255,0.25);
+  color: #94a3b8;
   white-space: nowrap;
 }
 
@@ -115,10 +116,10 @@
   padding: 8px 9px;
   margin-bottom: 1px;
   border-radius: 9px;
-  color: rgba(255,255,255,0.5);
+  color: #64748b;
   text-decoration: none;
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   transition: all 0.13s;
   border: 1px solid transparent;
@@ -126,19 +127,21 @@
   background: none;
   width: 100%;
 
-  .nav-icon { flex-shrink: 0; transition: stroke 0.13s; }
+  .nav-icon { flex-shrink: 0; transition: stroke 0.13s; stroke: #64748b; }
 
   &:hover {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.85);
+    background: #f8fafc;
+    color: #0f172a;
+    
+    .nav-icon { stroke: #0f172a; }
   }
 
   &.active {
-    background: rgba(124,58,237,0.18);
-    border-color: rgba(124,58,237,0.3);
-    color: #c4b5fd;
+    background: rgba(124,58,237,0.08);
+    border-color: rgba(124,58,237,0.15);
+    color: #7c3aed;
 
-    .nav-icon { stroke: #c4b5fd; }
+    .nav-icon { stroke: #7c3aed; }
   }
 }
 
@@ -155,7 +158,7 @@
 // ── Sidebar Footer ────────────────────────────────────────────
 .sidebar-footer {
   padding: 8px 8px 14px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -167,8 +170,8 @@
   gap: 9px;
   padding: 9px 10px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   margin-top: 4px;
   overflow: hidden;
 }
@@ -197,7 +200,7 @@
 .user-name {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #0f172a;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -205,7 +208,7 @@
 
 .user-email {
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.3);
+  color: #64748b;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -220,12 +223,12 @@
   border-radius: 7px;
   border: none;
   background: none;
-  color: rgba(255,255,255,0.3);
+  color: #94a3b8;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.13s;
 
-  &:hover { background: rgba(239,68,68,0.15); color: #f87171; }
+  &:hover { background: rgba(239,68,68,0.08); color: #ef4444; }
 }
 
 // ── Shared icon-btn ───────────────────────────────────────────

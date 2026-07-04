@@ -54,15 +54,28 @@ export class LoginPage {
 
     this.isSubmitting.set(true);
 
-    // Simulate login — replace with real API call
-    setTimeout(() => {
+    // Real API call to login endpoint
+    window.fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: this.email(), password: this.password() })
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Login failed');
+      }
       this.auth.login(
-        { id: '1', fullName: 'Sanjay', email: this.email() },
-        'mock-access-token'
+        { id: String(data.user.id), fullName: data.user.fullName, email: data.user.email },
+        data.accessToken
       );
       this.isSubmitting.set(false);
       this.router.navigate(['/workspace/dashboard']);
-    }, 1000);
+    })
+    .catch(err => {
+      this.isSubmitting.set(false);
+      this.serverError.set(err.message || 'Invalid credentials or server error.');
+    });
   }
 
   private validateEmail(value: string): boolean {

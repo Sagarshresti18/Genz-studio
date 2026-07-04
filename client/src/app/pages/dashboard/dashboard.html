@@ -3,7 +3,7 @@
   <!-- ── Welcome ─────────────────────────────────────────── -->
   <div class="welcome">
     <div class="welcome__left">
-      <p class="welcome__greeting">{{ greeting() }}, <span class="welcome__name">{{ creatorName() }}</span> 👋</p>
+      <p class="welcome__greeting">{{ greeting() }}, <span class="welcome__name">{{ creatorName() }}</span></p>
       <p class="welcome__sub">Here's what's happening with your content today.</p>
     </div>
     <div class="welcome__actions">
@@ -43,7 +43,50 @@
     <div class="tools-grid">
       @for (t of quickTools(); track t.label) {
         <a [routerLink]="t.route" class="tool-chip">
-          <span class="tool-chip__icon" [style.background]="t.bg" [style.color]="t.color">{{ t.icon }}</span>
+          <span class="tool-chip__icon" [style.background]="t.bg" [style.color]="t.color">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+              @switch (t.label) {
+                @case ('Thumbnail') {
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                }
+                @case ('YT Banner') {
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                }
+                @case ('Logo') {
+                  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
+                }
+                @case ('AI Script') {
+                  <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                  <path d="M2 2l7.5 7.5"/>
+                }
+                @case ('Edit Video') {
+                  <polygon points="23 7 16 12 23 17 23 7"/>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                }
+                @case ('AI Audio') {
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                }
+                @case ('Meme') {
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                  <line x1="9" y1="9" x2="9.01" y2="9"/>
+                  <line x1="15" y1="9" x2="15.01" y2="9"/>
+                }
+                @case ('Calendar') {
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                }
+              }
+            </svg>
+          </span>
           <span class="tool-chip__label">{{ t.label }}</span>
         </a>
       }
@@ -79,7 +122,7 @@
       <!-- Trending Templates -->
       <div class="card">
         <div class="card-head">
-          <h2 class="card-title">🔥 Trending Templates</h2>
+          <h2 class="card-title">Trending Templates</h2>
         </div>
         <div class="trending-list">
           @for (t of trending(); track t.name) {

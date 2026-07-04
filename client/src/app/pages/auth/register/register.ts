@@ -97,15 +97,32 @@ export class RegisterPage {
 
     this.isSubmitting.set(true);
 
-    // Simulate register — replace with real API call
-    setTimeout(() => {
+    // Real API call to register endpoint
+    window.fetch('http://localhost:8080/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fullName: this.fullName(),
+        email: this.email(),
+        password: this.password()
+      })
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Registration failed');
+      }
       this.auth.login(
-        { id: '1', fullName: this.fullName(), email: this.email() },
-        'mock-access-token'
+        { id: String(data.user.id), fullName: data.user.fullName, email: data.user.email },
+        data.accessToken
       );
       this.isSubmitting.set(false);
       this.router.navigate(['/workspace/dashboard']);
-    }, 1200);
+    })
+    .catch(err => {
+      this.isSubmitting.set(false);
+      this.serverError.set(err.message || 'Registration failed or server error.');
+    });
   }
 
   private validateFullName(value: string): boolean {
