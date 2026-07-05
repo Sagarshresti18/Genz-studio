@@ -25,16 +25,30 @@ const { musicRouter }     = require('./features/music-library/music.routes');
 const { contentRouter }   = require('./features/ai-content/content.routes');
 const { calendarRouter }  = require('./features/content-calendar/calendar.routes');
 const { memeRouter }      = require('./features/meme-library/meme.routes');
+// image proxy handlers (registered at app level so they remain public)
+const { proxyImage, generateTemplateImage } = require('./features/meme-library/meme.controller');
 
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.NODE_ENV === 'production' ? false : 'http://localhost:4200', credentials: true }));
+// Allow local dev ports (4200 and 4300) during development
+const devOrigins = ['http://localhost:4200', 'http://localhost:4300'];
+app.use(cors({ origin: env.NODE_ENV === 'production' ? false : (origin, cb) => cb(null, devOrigins.includes(origin)), credentials: true }));
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Simple request logger for debugging auth/CORS issues
+app.use((req, res, next) => {
+	try {
+		console.log('REQ', req.method, req.path, 'auth=', !!req.headers.authorization, 'origin=', req.headers.origin);
+	} catch (err) {
+		/* ignore logging errors */
+	}
+	next();
+});
 
 app.get('/api', (_req, res) => res.json({ success: true, message: 'GenZ Studio API' }));
 
@@ -54,6 +68,10 @@ app.use('/api/audio',      audioRouter);
 app.use('/api/music',      musicRouter);
 app.use('/api/content',    contentRouter);
 app.use('/api/calendar',   calendarRouter);
+// Public proxy endpoints (ensure these remain public regardless of router auth)
+app.get('/api/memes/proxy', proxyImage);
+app.get('/api/memes/generated', generateTemplateImage);
+
 app.use('/api/memes',      memeRouter);
 
 app.use(notFoundHandler);

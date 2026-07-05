@@ -1,16 +1,227 @@
-<div class="feature-page">
-  <div class="feature-hero" style="--accent:#10B981">
-    <div class="feature-hero__glow"></div>
-    <span class="feature-hero__icon">✧</span>
-    <h1 class="feature-hero__title">AI Content Generator</h1>
-    <p class="feature-hero__sub">Scripts, hooks, captions, blog posts — generate viral content with one prompt. Built for creators who move fast.</p>
-    <button class="feature-hero__btn">Generate Content</button>
-  </div>
-  <div class="feature-placeholder">
-    <div class="ph-card" *ngFor="let i of items">
-      <div class="ph-thumb" style="background:linear-gradient(135deg,#10B98122,#10B98144)"></div>
-      <div class="ph-line ph-line--lg"></div>
-      <div class="ph-line ph-line--sm"></div>
+<div class="studio">
+
+  <!-- ── Toast ─────────────────────────────────────────────── -->
+  @if (toast()) {
+    <div class="toast" [class.toast--err]="toast()!.type==='error'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        @if (toast()!.type==='success') { <polyline points="20 6 9 17 4 12"/> }
+        @else { <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/> }
+      </svg>
+      {{ toast()!.msg }}
+    </div>
+  }
+
+  <!-- ── Page Header ────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">AI Content Studio</h1>
+      <p class="page-desc">Generate scripts, hooks, captions, threads and more — powered by AI</p>
+    </div>
+    <div class="header-actions">
+      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='studio'" (click)="activeTab.set('studio')">Studio</button>
+      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='history'" (click)="activeTab.set('history');loadHistory()">
+        History
+        @if (history().length) { <span class="count-badge">{{ history().length }}</span> }
+      </button>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STUDIO TAB
+  ══════════════════════════════════════════════════════════ -->
+  @if (activeTab()==='studio') {
+    <div class="split">
+
+      <!-- ── Left: Controls ──────────────────────────────────── -->
+      <div class="controls">
+
+        <!-- Content Type -->
+        <div class="field-group">
+          <label class="field-label">Content type</label>
+          <div class="type-grid">
+            @for (t of contentTypes(); track t.key) {
+              <button class="type-tile" [class.type-tile--on]="selectedType()===t.key"
+                [style.--c]="t.color" (click)="selectedType.set(t.key)">
+                <span class="type-tile__ico">{{ t.icon }}</span>
+                <span class="type-tile__lbl">{{ t.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Prompt -->
+        <div class="field-group">
+          <label class="field-label">Prompt</label>
+          <textarea class="textarea" rows="4"
+            placeholder="Describe what you want to create — be specific for better results..."
+            [value]="prompt()" (input)="prompt.set($any($event.target).value)"></textarea>
+        </div>
+
+        <!-- Tone -->
+        <div class="field-group">
+          <label class="field-label">Tone</label>
+          <div class="pill-row">
+            @for (t of tones(); track t) {
+              <button class="pill" [class.pill--on]="selectedTone()===t" (click)="selectedTone.set(t)">{{ t }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Platform + Keywords -->
+        <div class="row-2">
+          <div class="field-group">
+            <label class="field-label">Platform <span class="opt">optional</span></label>
+            <input class="input" type="text" placeholder="YouTube, TikTok..."
+              [value]="platform()" (input)="platform.set($any($event.target).value)" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Keywords <span class="opt">optional</span></label>
+            <input class="input" type="text" placeholder="growth, monetize..."
+              [value]="keywords()" (input)="keywords.set($any($event.target).value)" />
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <button class="gen-btn" [disabled]="!prompt().trim()||isGenerating()" (click)="generate()">
+          @if (isGenerating()) {
+            <span class="spinner"></span>Generating...
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Generate
+          }
+        </button>
+
+        <!-- Trending -->
+        <div class="field-group">
+          <label class="field-label">Trending topics</label>
+          <div class="trending-list">
+            @for (t of trendingTopics(); track t.topic) {
+              <button class="trending-row" (click)="useTrendingTopic(t)">
+                <div class="trending-row__left">
+                  <span class="trending-row__niche">{{ t.niche }}</span>
+                  <span class="trending-row__topic">{{ t.topic }}</span>
+                </div>
+                <span class="trending-row__badge">{{ t.trend }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Right: Output ───────────────────────────────────── -->
+      <div class="output-pane">
+        <div class="output-bar">
+          <div class="output-bar__left">
+            <span class="output-bar__title">Output</span>
+            @if (streamedOutput()) {
+              <span class="output-bar__meta">{{ wordCount() }} words</span>
+            }
+            @if (selectedHistoryItem()) {
+              <span class="output-bar__from">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                From history
+              </span>
+            }
+          </div>
+          @if (streamedOutput()) {
+            <div class="output-bar__actions">
+              <button class="out-btn" (click)="copyOutput()">
+                @if (copied()) {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Copied
+                } @else {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                }
+              </button>
+              <button class="out-btn out-btn--ghost" (click)="clearOutput()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Clear
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="output-body" #outputEl>
+          @if (!streamedOutput() && !isGenerating()) {
+            <div class="output-empty">
+              <div class="output-empty__icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <p>Ready to generate</p>
+              <span>Pick a content type, write your prompt, and hit Generate</span>
+            </div>
+          }
+          @if (isGenerating() && !streamedOutput()) {
+            <div class="output-loading">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <p>Writing your content...</p>
+            </div>
+          }
+          @if (streamedOutput()) {
+            <div class="output-text" [innerHTML]="streamedOutput() | markdownToHtml"></div>
+            @if (isGenerating()) { <span class="cursor">▋</span> }
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════
+       HISTORY TAB
+  ══════════════════════════════════════════════════════════ -->
+  @if (activeTab()==='history') {
+    <div class="history-view">
+
+      <div class="history-toolbar">
+        <div class="search-box">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search history..."
+            [value]="historySearch()" (input)="historySearch.set($any($event.target).value)" />
+        </div>
+        <div class="filter-row">
+          <button class="filter-pill" [class.filter-pill--on]="historyFilter()==='all'" (click)="historyFilter.set('all')">All</button>
+          @for (t of contentTypes(); track t.key) {
+            <button class="filter-pill" [class.filter-pill--on]="historyFilter()===t.key" (click)="historyFilter.set(t.key)">
+              {{ t.icon }} {{ t.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (loadingHistory()) {
+        <div class="history-grid">
+          @for (i of [1,2,3,4,5,6]; track i) { <div class="h-skeleton"></div> }
+        </div>
+      } @else if (!filteredHistory().length) {
+        <div class="empty-state">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>No content found</p>
+          <span>Generate some content to see it here</span>
+        </div>
+      } @else {
+        <div class="history-grid">
+          @for (item of filteredHistory(); track item.id) {
+            <div class="h-card" (click)="selectHistoryItem(item)">
+              <div class="h-card__top">
+                <span class="h-card__type" [style.background]="typeColors[item.type]+'18'" [style.color]="typeColors[item.type]">
+                  {{ typeIcons[item.type] }} {{ getTypeLabel(item.type) }}
+                </span>
+                @if (item.tone) { <span class="h-card__tone">{{ item.tone }}</span> }
+                <button class="h-card__del" (click)="deleteHistoryItem(item,$event)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
+              </div>
+              <p class="h-card__prompt">{{ item.prompt }}</p>
+              <p class="h-card__preview">{{ item.output_text }}</p>
+              <span class="h-card__date">{{ formatDate(item.created_at) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
 </div>

@@ -1,17 +1,22 @@
 const { Router } = require('express');
 const { authenticate } = require('../../middleware/auth');
-const { listTemplates, listMyMemes, remixMeme } = require('./meme.controller');
+const { listTemplates, listMyMemes, remixMeme, generateAiCaption, generateAiBackground, removeMeme, proxyImage, generateTemplateImage } = require('./meme.controller');
 
 const memeRouter = Router();
-memeRouter.use(authenticate);
 
-// GET  /api/memes/templates
+// Templates are public — no auth needed for browsing
 memeRouter.get('/templates', listTemplates);
+// Proxy for remote images
+memeRouter.get('/proxy', proxyImage);
+// Generate a template image on demand (requires GEMINI_API_KEY in server .env)
+memeRouter.get('/generated', generateTemplateImage);
 
-// GET  /api/memes/mine
+// These require auth
+memeRouter.use(authenticate);
 memeRouter.get('/mine', listMyMemes);
-
-// POST /api/memes/remix
 memeRouter.post('/remix', remixMeme);
+memeRouter.post('/ai-caption', generateAiCaption);
+memeRouter.post('/ai-background', generateAiBackground);
+memeRouter.delete('/:id', removeMeme);
 
 module.exports = { memeRouter };
