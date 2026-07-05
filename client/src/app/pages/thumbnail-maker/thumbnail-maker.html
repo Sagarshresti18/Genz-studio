@@ -1,16 +1,468 @@
-<div class="feature-page">
-  <div class="feature-hero" style="--accent:#F97316">
-    <div class="feature-hero__glow"></div>
-    <span class="feature-hero__icon">▣</span>
-    <h1 class="feature-hero__title">Thumbnail Maker</h1>
-    <p class="feature-hero__sub">High-CTR thumbnails with AI face enhancement, bold text overlays, and proven viral layouts.</p>
-    <button class="feature-hero__btn">Make Thumbnail</button>
-  </div>
-  <div class="feature-placeholder">
-    <div class="ph-card" *ngFor="let i of items">
-      <div class="ph-thumb" style="background:linear-gradient(135deg,#F9731622,#F9731644)"></div>
-      <div class="ph-line ph-line--lg"></div>
-      <div class="ph-line ph-line--sm"></div>
+<div class="tm-page">
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <div class="tm-header">
+    <div class="tm-header__left">
+      <span class="tm-header__icon">▣</span>
+      <div>
+        <h1 class="tm-header__title">Thumbnail Maker</h1>
+        <p class="tm-header__sub">Design high-CTR thumbnails for every platform</p>
+      </div>
     </div>
+    <div class="tm-header__right">
+      <select class="tm-select" [value]="exportFormat()" (change)="exportFormat.set($any($event.target).value)">
+        <option value="png">PNG</option>
+        <option value="jpg">JPG</option>
+        <option value="webp">WebP</option>
+      </select>
+      <button class="tm-btn tm-btn--export" (click)="exportThumbnail()" [disabled]="exporting()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        {{ exporting() ? 'Exporting…' : 'Export' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Platform Bar ─────────────────────────────────────── -->
+  <div class="platform-bar">
+    <button *ngFor="let p of platforms"
+      class="platform-chip" [class.platform-chip--active]="selectedPlatform()===p.id"
+      (click)="selectPlatform(p.id)">
+      <span>{{ p.icon }}</span>
+      <span class="platform-chip__label">{{ p.label }}</span>
+      <span class="platform-chip__size">{{ p.w }}×{{ p.h }}</span>
+    </button>
+  </div>
+
+  <!-- ── Editor ───────────────────────────────────────────── -->
+  <div class="tm-editor">
+
+    <!-- ── Left Panel ──────────────────────────────────────── -->
+    <div class="tm-panel">
+      <div class="panel-tabs">
+        <button class="panel-tab" [class.panel-tab--active]="editorTab()==='templates'" (click)="editorTab.set('templates')">Templates</button>
+        <button class="panel-tab" [class.panel-tab--active]="editorTab()==='upload'"    (click)="editorTab.set('upload')">Upload</button>
+        <button class="panel-tab panel-tab--ai" [class.panel-tab--active]="editorTab()==='ai'" (click)="editorTab.set('ai')">✨ AI</button>
+      </div>
+
+      <!-- Templates -->
+      @if (editorTab() === 'templates') {
+        <div class="panel-body">
+          <p class="panel-label">Starter Templates</p>
+          <div class="template-grid">
+            @for (t of templates; track t.id) {
+              <button class="template-card" (click)="applyTemplate(t)">
+                <div class="template-card__preview" [style.background]="t.gradient"></div>
+                <span class="template-card__name">{{ t.name }}</span>
+              </button>
+            }
+          </div>
+
+          <p class="panel-label" style="margin-top:16px">Background</p>
+          <div class="bg-type-row">
+            <button class="bg-type-btn" [class.bg-type-btn--active]="bgType()==='color'"    (click)="bgType.set('color')">Color</button>
+            <button class="bg-type-btn" [class.bg-type-btn--active]="bgType()==='gradient'" (click)="bgType.set('gradient')">Gradient</button>
+            <button class="bg-type-btn" [class.bg-type-btn--active]="bgType()==='image'"    (click)="triggerBgUpload()">Image</button>
+          </div>
+          <input #bgInput type="file" accept="image/*" class="hidden-input" (change)="onBgUpload($event)"/>
+
+          @if (bgType() === 'color') {
+            <div class="color-row">
+              <input type="color" class="color-swatch" [value]="bgColor()" (input)="bgColor.set($any($event.target).value)"/>
+              <span class="color-label">{{ bgColor() }}</span>
+            </div>
+          }
+          @if (bgType() === 'gradient') {
+            <div class="gradient-presets">
+              @for (g of gradients; track g) {
+                <button class="gradient-dot" [style.background]="g"
+                  [class.gradient-dot--active]="bgGradient()===g"
+                  (click)="bgGradient.set(g)"></button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Upload -->
+      @if (editorTab() === 'upload') {
+        <div class="panel-body">
+          <div class="upload-header">
+            <p class="panel-label">Images ({{ imageCount() }}/4)</p>
+            <button class="tm-btn tm-btn--sm" (click)="triggerMultiUpload()" [disabled]="imageCount()>=4">
+              + Add Image
+            </button>
+          </div>
+          <input #multiInput type="file" accept="image/*" multiple class="hidden-input" (change)="onMultiUpload($event)"/>
+
+          @if (imageCount() === 0) {
+            <div class="upload-zone" (click)="triggerMultiUpload()">
+              <div class="upload-zone__inner">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+                <span>Upload up to 4 images</span>
+                <span class="upload-zone__hint">PNG, JPG, WebP</span>
+              </div>
+            </div>
+          }
+
+          <!-- Uploaded image thumbnails -->
+          @if (imageCount() > 0) {
+            <div class="uploaded-grid">
+              @for (l of layers(); track l.id) {
+                @if (l.type === 'image') {
+                  <div class="uploaded-item" [class.uploaded-item--selected]="selectedId()===l.id" (click)="selectedId.set(l.id)">
+                    <img [src]="l.src" alt="layer" class="uploaded-item__img"/>
+                    <div class="uploaded-item__actions">
+                      <button class="icon-action" title="Remove BG" (click)="removeBg(l.id); $event.stopPropagation()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM4.93 4.93l14.14 14.14"/>
+                        </svg>
+                      </button>
+                      <button class="icon-action icon-action--del" title="Delete" (click)="removeLayer(l.id); $event.stopPropagation()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </div>
+                    @if (l.bgRemoved) {
+                      <span class="bg-removed-badge">BG Removed</span>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+
+          <p class="panel-label" style="margin-top:14px">Background</p>
+          <div class="bg-type-row">
+            <button class="bg-type-btn" [class.bg-type-btn--active]="bgType()==='color'"    (click)="bgType.set('color')">Color</button>
+            <button class="bg-type-btn" [class.bg-type-btn--active]="bgType()==='gradient'" (click)="bgType.set('gradient')">Gradient</button>
+            <button class="bg-type-btn" [class.bg-type-btn--active]="bgType()==='image'"    (click)="triggerBgUpload()">Image</button>
+          </div>
+
+          @if (bgType() === 'color') {
+            <div class="color-row">
+              <input type="color" class="color-swatch" [value]="bgColor()" (input)="bgColor.set($any($event.target).value)"/>
+              <span class="color-label">{{ bgColor() }}</span>
+            </div>
+          }
+          @if (bgType() === 'gradient') {
+            <div class="gradient-presets">
+              @for (g of gradients; track g) {
+                <button class="gradient-dot" [style.background]="g"
+                  [class.gradient-dot--active]="bgGradient()===g"
+                  (click)="bgGradient.set(g)"></button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- AI -->
+      @if (editorTab() === 'ai') {
+        <div class="panel-body">
+          <p class="panel-label">AI Thumbnail Generator</p>
+          <p class="panel-hint">Describe your video and let AI design the thumbnail.</p>
+          <label class="field-label">Video Title</label>
+          <input class="tm-input" type="text" placeholder="e.g. 10 Life Hacks You Need"
+            [value]="aiTitle()" (input)="aiTitle.set($any($event.target).value)"/>
+          <label class="field-label">Describe the thumbnail</label>
+          <textarea class="tm-textarea" rows="3"
+            placeholder="e.g. Shocked face, bold red text, dark background, fire effects..."
+            [value]="aiPrompt()" (input)="aiPrompt.set($any($event.target).value)"></textarea>
+          <button class="tm-btn tm-btn--ai" (click)="generateAiThumbnail()" [disabled]="aiGenerating()||!aiPrompt().trim()">
+            @if (aiGenerating()) { <span class="spinner"></span> Generating… }
+            @else { ✨ Generate Thumbnail }
+          </button>
+          @if (aiResult()) {
+            <div class="ai-note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              AI thumbnail applied! Edit it in the canvas.
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ── Canvas ───────────────────────────────────────────── -->
+    <div class="tm-canvas-wrap">
+      <div class="tm-canvas-container">
+        <div class="tm-canvas" #canvasEl
+          [style.padding-top]="aspectPadding()"
+          [style.container-type]="'size'"
+          (click)="deselectAll()">
+
+          <!-- Background -->
+          <div class="canvas-bg"
+            [style.background]="getCanvasBg()"
+            [style.background-size]="bgType()==='image' ? 'cover' : undefined"
+            [style.background-position]="bgType()==='image' ? 'center' : undefined"
+            [style.filter]="activeFilter()">
+          </div>
+
+          <!-- Layers -->
+          @for (l of layers(); track l.id) {
+            <div class="canvas-layer"
+              [ngStyle]="layerStyle(l)"
+              (click)="selectLayer(l.id, $event)"
+              (pointerdown)="onPointerDown($event, l.id, 'move')">
+
+              <!-- Image layer -->
+              @if (l.type === 'image') {
+                <img [src]="l.src" class="layer-img" [class.layer-img--bg-removed]="l.bgRemoved" draggable="false" alt=""/>
+              }
+
+              <!-- Text layer -->
+              @if (l.type === 'text') {
+                <div class="layer-text" [ngStyle]="textInnerStyle(l)">{{ l.text }}</div>
+              }
+
+              <!-- Sticker layer -->
+              @if (l.type === 'sticker') {
+                <div class="layer-sticker" [ngStyle]="stickerInnerStyle(l)">{{ l.emoji }}</div>
+              }
+
+              <!-- Controls (visible when selected) -->
+              @if (selectedId() === l.id) {
+                <button class="layer-del" (click)="removeLayer(l.id); $event.stopPropagation()" title="Delete">✕</button>
+                <div class="resize-handle"
+                  (pointerdown)="onPointerDown($event, l.id, 'resize')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M1 9L9 1M5 9L9 5M9 9V1" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <p class="canvas-info">{{ currentPlatform().label }} · {{ currentPlatform().w }}×{{ currentPlatform().h }}px</p>
+      </div>
+    </div>
+
+    <!-- ── Right Tools ──────────────────────────────────────── -->
+    <div class="tm-tools">
+      <div class="tool-tabs">
+        <button class="tool-tab" [class.tool-tab--active]="toolTab()==='images'"   (click)="toolTab.set('images')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Images
+        </button>
+        <button class="tool-tab" [class.tool-tab--active]="toolTab()==='text'"     (click)="toolTab.set('text')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          Text
+        </button>
+        <button class="tool-tab" [class.tool-tab--active]="toolTab()==='stickers'" (click)="toolTab.set('stickers')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+          Stickers
+        </button>
+        <button class="tool-tab" [class.tool-tab--active]="toolTab()==='effects'"  (click)="toolTab.set('effects')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/></svg>
+          Effects
+        </button>
+      </div>
+
+      <!-- ── Images Tool ──────────────────────────────────── -->
+      @if (toolTab() === 'images') {
+        <div class="tool-body">
+          <!-- Selected image controls -->
+          @if (selectedLayer() && selectedLayer()!.type === 'image') {
+            <p class="panel-label">Selected Image</p>
+            <div class="sel-actions">
+              <button class="sel-btn" (click)="removeBg(selectedLayer()!.id)">
+                {{ selectedLayer()!.bgRemoved ? '✓ BG Removed' : 'Remove BG' }}
+              </button>
+              <button class="sel-btn" (click)="bringForward(selectedLayer()!.id)">Forward</button>
+              <button class="sel-btn" (click)="sendBackward(selectedLayer()!.id)">Backward</button>
+              <button class="sel-btn sel-btn--del" (click)="removeLayer(selectedLayer()!.id)">Delete</button>
+            </div>
+            <div class="size-row">
+              <div class="size-field">
+                <label class="field-label">Width %</label>
+                <input class="tm-input" type="number" min="5" max="100"
+                  [value]="selectedLayer()!.w | number:'1.0-0'"
+                  (input)="updateSelected({w: +$any($event.target).value})"/>
+              </div>
+              <div class="size-field">
+                <label class="field-label">Height %</label>
+                <input class="tm-input" type="number" min="5" max="100"
+                  [value]="selectedLayer()!.h | number:'1.0-0'"
+                  (input)="updateSelected({h: +$any($event.target).value})"/>
+              </div>
+            </div>
+          } @else {
+            <p class="panel-hint">Select an image on the canvas to edit it, or add a new one.</p>
+            <button class="tm-btn tm-btn--add" (click)="triggerMultiUpload()" [disabled]="imageCount()>=4">
+              + Add Image ({{ imageCount() }}/4)
+            </button>
+          }
+
+          <!-- Layers list -->
+          @if (layers().length) {
+            <div class="layers-list">
+              <p class="panel-label">All Layers</p>
+              @for (l of layers(); track l.id) {
+                <div class="layer-row" [class.layer-row--active]="selectedId()===l.id" (click)="selectedId.set(l.id)">
+                  <span class="layer-row__icon">
+                    @if (l.type==='image')   { 🖼 }
+                    @if (l.type==='text')    { T }
+                    @if (l.type==='sticker') { {{ l.emoji }} }
+                  </span>
+                  <span class="layer-row__name">
+                    @if (l.type==='image')   { Image }
+                    @if (l.type==='text')    { {{ l.text }} }
+                    @if (l.type==='sticker') { Sticker }
+                  </span>
+                  <button class="layer-row__del" (click)="removeLayer(l.id); $event.stopPropagation()">✕</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Text Tool ────────────────────────────────────── -->
+      @if (toolTab() === 'text') {
+        <div class="tool-body">
+          <!-- Edit selected text layer -->
+          @if (selectedLayer() && selectedLayer()!.type === 'text') {
+            <p class="panel-label">Edit Text</p>
+            <input class="tm-input" type="text"
+              [value]="selectedLayer()!.text"
+              (input)="updateSelected({text: $any($event.target).value})"/>
+            <div class="tool-row">
+              <div class="tool-field">
+                <label class="field-label">Size</label>
+                <input class="tm-input" type="number" min="12" max="120"
+                  [value]="selectedLayer()!.fontSize"
+                  (input)="updateSelected({fontSize: +$any($event.target).value})"/>
+              </div>
+              <div class="tool-field">
+                <label class="field-label">Weight</label>
+                <select class="tm-select sm"
+                  [value]="selectedLayer()!.fontWeight"
+                  (change)="updateSelected({fontWeight: $any($event.target).value})">
+                  <option value="400">Regular</option>
+                  <option value="700">Bold</option>
+                  <option value="900">Black</option>
+                </select>
+              </div>
+            </div>
+            <label class="field-label">Color</label>
+            <div class="color-row">
+              <input type="color" class="color-swatch"
+                [value]="selectedLayer()!.color"
+                (input)="updateSelected({color: $any($event.target).value})"/>
+              <div class="color-presets">
+                @for (c of textColors; track c) {
+                  <button class="color-dot" [style.background]="c" (click)="updateSelected({color: c})"></button>
+                }
+              </div>
+            </div>
+            <div class="toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" [checked]="selectedLayer()!.shadow"
+                  (change)="updateSelected({shadow: $any($event.target).checked})"/>
+                Drop Shadow
+              </label>
+              <label class="toggle-label">
+                <input type="checkbox" [checked]="selectedLayer()!.stroke"
+                  (change)="updateSelected({stroke: $any($event.target).checked})"/>
+                Text Stroke
+              </label>
+            </div>
+            <div class="sel-actions" style="margin-top:10px">
+              <button class="sel-btn" (click)="bringForward(selectedLayer()!.id)">Forward</button>
+              <button class="sel-btn" (click)="sendBackward(selectedLayer()!.id)">Backward</button>
+              <button class="sel-btn sel-btn--del" (click)="removeLayer(selectedLayer()!.id)">Delete</button>
+            </div>
+          } @else {
+            <!-- Add new text -->
+            <p class="panel-label">Add Text</p>
+            <input class="tm-input" type="text" placeholder="Your text here…"
+              [value]="newText()" (input)="newText.set($any($event.target).value)"/>
+            <div class="tool-row">
+              <div class="tool-field">
+                <label class="field-label">Size</label>
+                <input class="tm-input" type="number" min="12" max="120"
+                  [value]="newFontSize()" (input)="newFontSize.set(+$any($event.target).value)"/>
+              </div>
+              <div class="tool-field">
+                <label class="field-label">Weight</label>
+                <select class="tm-select sm" [value]="newFontWeight()" (change)="newFontWeight.set($any($event.target).value)">
+                  <option value="400">Regular</option>
+                  <option value="700">Bold</option>
+                  <option value="900">Black</option>
+                </select>
+              </div>
+            </div>
+            <label class="field-label">Color</label>
+            <div class="color-row">
+              <input type="color" class="color-swatch" [value]="newTextColor()" (input)="newTextColor.set($any($event.target).value)"/>
+              <div class="color-presets">
+                @for (c of textColors; track c) {
+                  <button class="color-dot" [style.background]="c" (click)="newTextColor.set(c)"></button>
+                }
+              </div>
+            </div>
+            <div class="toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" [checked]="newShadow()" (change)="newShadow.set($any($event.target).checked)"/> Drop Shadow
+              </label>
+              <label class="toggle-label">
+                <input type="checkbox" [checked]="newStroke()" (change)="newStroke.set($any($event.target).checked)"/> Text Stroke
+              </label>
+            </div>
+            <button class="tm-btn tm-btn--add" (click)="addText()" [disabled]="!newText().trim()">+ Add Text</button>
+          }
+        </div>
+      }
+
+      <!-- ── Stickers Tool ────────────────────────────────── -->
+      @if (toolTab() === 'stickers') {
+        <div class="tool-body">
+          @if (selectedLayer() && selectedLayer()!.type === 'sticker') {
+            <p class="panel-label">Selected Sticker</p>
+            <div class="size-row">
+              <div class="size-field">
+                <label class="field-label">Width %</label>
+                <input class="tm-input" type="number" min="4" max="60"
+                  [value]="selectedLayer()!.w | number:'1.0-0'"
+                  (input)="updateSelected({w: +$any($event.target).value, h: +$any($event.target).value})"/>
+              </div>
+            </div>
+            <div class="sel-actions" style="margin-top:8px">
+              <button class="sel-btn" (click)="bringForward(selectedLayer()!.id)">Forward</button>
+              <button class="sel-btn" (click)="sendBackward(selectedLayer()!.id)">Backward</button>
+              <button class="sel-btn sel-btn--del" (click)="removeLayer(selectedLayer()!.id)">Delete</button>
+            </div>
+            <div class="divider"></div>
+          }
+          <p class="panel-label">Tap to add</p>
+          <div class="sticker-grid">
+            @for (s of stickers; track s) {
+              <button class="sticker-btn" (click)="addSticker(s)">{{ s }}</button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── Effects Tool ─────────────────────────────────── -->
+      @if (toolTab() === 'effects') {
+        <div class="tool-body">
+          <p class="panel-label">Canvas Effect</p>
+          <div class="effects-grid">
+            @for (ef of effects; track ef.id) {
+              <button class="effect-card" [class.effect-card--active]="activeEffect()===ef.id" (click)="activeEffect.set(ef.id)">
+                <div class="effect-card__preview" [style.background]="bgGradient()" [style.filter]="ef.filter"></div>
+                <span class="effect-card__label">{{ ef.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
   </div>
 </div>
