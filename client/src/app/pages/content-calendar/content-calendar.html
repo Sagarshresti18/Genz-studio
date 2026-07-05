@@ -1,16 +1,137 @@
-<div class="feature-page">
-  <div class="feature-hero" style="--accent:#6366F1">
-    <div class="feature-hero__glow"></div>
-    <span class="feature-hero__icon">◫</span>
-    <h1 class="feature-hero__title">Content Calendar</h1>
-    <p class="feature-hero__sub">Plan, schedule, and auto-publish across YouTube, Instagram, and TikTok — all from one visual calendar.</p>
-    <button class="feature-hero__btn">Open Calendar</button>
+<div class="cal">
+
+  <!-- Header -->
+  <div class="cal-header">
+    <div>
+      <h1 class="page-title">Content Calendar</h1>
+      <p class="page-desc">Plan and schedule posts across all platforms</p>
+    </div>
+    <button class="primary-btn" (click)="openAdd()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Post
+    </button>
   </div>
-  <div class="feature-placeholder">
-    <div class="ph-card" *ngFor="let i of items">
-      <div class="ph-thumb" style="background:linear-gradient(135deg,#6366F122,#6366F144)"></div>
-      <div class="ph-line ph-line--lg"></div>
-      <div class="ph-line ph-line--sm"></div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-chip"><span class="stat-chip__val">{{ stats().total }}</span><span>Total</span></div>
+    <div class="stat-chip stat-chip--blue"><span class="stat-chip__val">{{ stats().scheduled }}</span><span>Scheduled</span></div>
+    <div class="stat-chip stat-chip--yellow"><span class="stat-chip__val">{{ stats().draft }}</span><span>Drafts</span></div>
+    <div class="stat-chip stat-chip--green"><span class="stat-chip__val">{{ stats().published }}</span><span>Published</span></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="cal-toolbar">
+    <div class="week-nav">
+      <button class="nav-btn" (click)="prevWeek()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="week-label">{{ weekRange() }}</span>
+      <button class="nav-btn" (click)="nextWeek()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="platform-filters">
+      <button class="pf-btn" [class.pf-btn--on]="filterPlatform()==='all'" (click)="filterPlatform.set('all')">All</button>
+      @for (p of platforms; track p.key) {
+        <button class="pf-btn" [class.pf-btn--on]="filterPlatform()===p.key"
+          [style.--pc]="p.color" (click)="filterPlatform.set(p.key)">{{ p.label }}</button>
+      }
     </div>
   </div>
+
+  <!-- Week Grid -->
+  <div class="week-grid">
+    @for (day of weekDays(); track day.toISOString()) {
+      <div class="day-col" [class.day-col--today]="isToday(day)">
+        <div class="day-col__head" (click)="openAdd(day)">
+          <span class="day-col__name">{{ dayLabel(day) }}</span>
+          <span class="day-col__num" [class.today-badge]="isToday(day)">{{ dayNum(day) }}</span>
+          @if (isToday(day)) { <span class="today-dot"></span> }
+        </div>
+        <div class="day-col__body">
+          @for (post of postsForDay(day); track post.id) {
+            <div class="post-card" [style.--pc]="post.color" (click)="openEdit(post, $event)">
+              <div class="post-card__top">
+                <span class="post-card__platform" [style.background]="post.color + '22'" [style.color]="post.color">
+                  {{ getPlatform(post.platform)?.label }}
+                </span>
+                <span class="post-card__status" [class]="'status--' + post.status">{{ post.status }}</span>
+              </div>
+              <p class="post-card__title">{{ post.title }}</p>
+              <div class="post-card__foot">
+                <span class="post-card__time">{{ post.time }}</span>
+                <span class="post-card__type">{{ post.type }}</span>
+                <button class="post-card__del" (click)="deletePost(post.id, $event)">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          }
+          <button class="add-day-btn" (click)="openAdd(day)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Modal -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="showModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h2>{{ editPost() ? 'Edit Post' : 'Schedule Post' }}</h2>
+          <button class="modal-close" (click)="showModal.set(false)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="field-group">
+            <label class="field-label">Title</label>
+            <input class="input" type="text" placeholder="Post title..."
+              [value]="form().title" (input)="onTitleInput($event)" />
+          </div>
+          <div class="row-2">
+            <div class="field-group">
+              <label class="field-label">Platform</label>
+              <select class="input" [value]="form().platform" (change)="onPlatformChange($event)">
+                @for (p of platforms; track p.key) { <option [value]="p.key">{{ p.label }}</option> }
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Content Type</label>
+              <select class="input" [value]="form().type" (change)="onTypeChange($event)">
+                @for (t of contentTypes; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="field-group">
+              <label class="field-label">Date</label>
+              <input class="input" type="date" [value]="form().date" (input)="onDateInput($event)" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Time</label>
+              <input class="input" type="time" [value]="form().time" (input)="onTimeInput($event)" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Status</label>
+            <div class="status-row">
+              @for (s of ['scheduled','draft','published']; track s) {
+                <button class="status-btn" [class.status-btn--on]="form().status===s"
+                  (click)="setStatus(s)">{{ s }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="ghost-btn" (click)="showModal.set(false)">Cancel</button>
+          <button class="primary-btn" (click)="savePost()">{{ editPost() ? 'Save Changes' : 'Schedule Post' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>
