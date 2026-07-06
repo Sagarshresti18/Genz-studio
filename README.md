@@ -4,7 +4,7 @@ An AI-powered creator platform for designing YouTube banners, thumbnails, profil
 
 ## Architecture
 
-**Backend**: Node.js + Express API (JavaScript, no TypeScript)  
+**Backend**: Node.js + Express API (JavaScript)  
 **Frontend**: Angular 18+ standalone components with white/light UI theme  
 **Database**: PostgreSQL (Neon optional)
 
