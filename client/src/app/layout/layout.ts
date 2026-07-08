@@ -1,5 +1,6 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 
 interface NavItem {
@@ -12,19 +13,23 @@ interface NavItem {
 
 interface NavGroup {
   label: string;
+  collapsed: boolean;
   items: NavItem[];
 }
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './layout.html',
   styleUrl: './layout.scss'
 })
 export class WorkspaceLayoutComponent {
-  protected readonly sidebarCollapsed = signal(false);
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+
+  protected readonly sidebarCollapsed = signal(false); // Always expanded on desktop
   protected readonly mobileMenuOpen = signal(false);
+  protected readonly showUserMenu = signal(false);
 
   protected readonly userName = computed(() => this.auth.user()?.fullName ?? 'Creator');
   protected readonly userEmail = computed(() => this.auth.user()?.email ?? '');
@@ -33,6 +38,7 @@ export class WorkspaceLayoutComponent {
   protected readonly navGroups = signal<NavGroup[]>([
     {
       label: 'Overview',
+      collapsed: false,
       items: [
         { icon: 'home', label: 'Dashboard', route: '/workspace/dashboard' },
         { icon: 'calendar', label: 'Content Calendar', route: '/workspace/content-calendar' },
@@ -40,6 +46,7 @@ export class WorkspaceLayoutComponent {
     },
     {
       label: 'Design Studio',
+      collapsed: false,
       items: [
         { icon: 'logo', label: 'Logo Generator', route: '/workspace/logo-generator' },
         { icon: 'banner', label: 'YouTube Banner', route: '/workspace/youtube-banner' },
@@ -49,6 +56,7 @@ export class WorkspaceLayoutComponent {
     },
     {
       label: 'Video & Audio',
+      collapsed: false,
       items: [
         { icon: 'video', label: 'Video Editor', route: '/workspace/video-editor' },
         { icon: 'ai-video', label: 'AI Videos', route: '/workspace/ai-videos', badge: 'Beta', badgeColor: '#EC4899' },
@@ -58,6 +66,7 @@ export class WorkspaceLayoutComponent {
     },
     {
       label: 'AI & Content',
+      collapsed: false,
       items: [
         { icon: 'content', label: 'AI Content', route: '/workspace/ai-content' },
         { icon: 'meme', label: 'Meme Library', route: '/workspace/meme-library' },
@@ -67,9 +76,48 @@ export class WorkspaceLayoutComponent {
 
   constructor(protected auth: AuthService) {}
 
-  protected toggleSidebar(): void { this.sidebarCollapsed.update(v => !v); }
+  @HostListener('document:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent) {
+    // ⌘K / Ctrl+K for search focus
+    if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      event.preventDefault();
+      this.searchInput?.nativeElement?.focus();
+    }
+    // Escape to close user menu
+    if (event.key === 'Escape') {
+      this.showUserMenu.set(false);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: Event) {
+    // Close user dropdown when clicking outside
+    const target = event.target as HTMLElement;
+    if (!target.closest('.user-section')) {
+      this.showUserMenu.set(false);
+    }
+  }
+
+  protected toggleSidebar(): void { /* Sidebar is fixed - no toggle on desktop */ }
   protected toggleMobileMenu(): void { this.mobileMenuOpen.update(v => !v); }
   protected closeMobileMenu(): void { this.mobileMenuOpen.set(false); }
+
+  protected toggleGroup(index: number): void {
+    this.navGroups.update(groups => {
+      const updated = [...groups];
+      updated[index] = { ...updated[index], collapsed: !updated[index].collapsed };
+      return updated;
+    });
+  }
+
+  protected toggleUserMenu(): void {
+    this.showUserMenu.update(v => !v);
+  }
+
+  protected logout(): void {
+    this.showUserMenu.set(false);
+    this.auth.logout();
+  }
 
   protected getIcon(name: string): string {
     const map: Record<string, string> = {

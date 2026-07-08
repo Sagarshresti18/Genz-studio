@@ -1,16 +1,90 @@
 <div class="feature-page">
-  <div class="feature-hero" style="--accent:#14B8A6">
-    <div class="feature-hero__glow"></div>
-    <span class="feature-hero__icon">♫</span>
+  <div class="feature-hero">
     <h1 class="feature-hero__title">Music Library</h1>
-    <p class="feature-hero__sub">100,000+ royalty-free tracks, beats, and stems — search by mood, genre, or BPM. Use freely on any platform.</p>
-    <button class="feature-hero__btn">Browse Tracks</button>
+    <p class="feature-hero__sub">Search and listen to music from YouTube and Jamendo — play, discover, and download.</p>
+    
+    <div class="music-search">
+      <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="searchTracks()" class="music-search__input" placeholder="Search tracks...">
+      <button class="music-search__btn" (click)="searchTracks()">Search</button>
+    </div>
   </div>
-  <div class="feature-placeholder">
-    <div class="ph-card" *ngFor="let i of items">
-      <div class="ph-thumb" style="background:linear-gradient(135deg,#14B8A622,#14B8A644)"></div>
+  
+  <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+  
+  <div class="music-grid">
+    <div class="music-card" *ngFor="let track of tracks" [class.is-playing]="currentlyPlayingId === track.id">
+      <div class="music-card__image-wrapper" (click)="togglePlay(track)">
+        <img [src]="track.thumbnail" [alt]="track.title" class="music-card__image">
+        <div class="music-card__overlay">
+          <button class="music-card__action music-card__action--play" title="Play/Pause">
+            <svg *ngIf="currentlyPlayingId !== track.id" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg *ngIf="currentlyPlayingId === track.id" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+          </button>
+          
+          <button class="music-card__action music-card__action--download" *ngIf="track.type === 'jamendo'" (click)="downloadTrack(track, $event)" title="Download">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="music-card__info">
+        <h3 class="music-card__title">{{ track.title }}</h3>
+        <p class="music-card__artist">{{ track.artist }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-placeholder" *ngIf="loading || loadingMore">
+    <div class="ph-card" *ngFor="let i of [1,2,3,4,5,6]">
+      <div class="ph-thumb"></div>
       <div class="ph-line ph-line--lg"></div>
       <div class="ph-line ph-line--sm"></div>
     </div>
   </div>
+  
+  <div class="load-more-container" *ngIf="nextPageToken && !loading">
+    <button class="music-search__btn load-more-btn" (click)="loadMore()">Load More</button>
+  </div>
+
+  <div class="music-player" *ngIf="currentTrack">
+    <div class="music-player__left">
+      <img [src]="currentTrack.thumbnail" [alt]="currentTrack.title" class="music-player__thumb">
+      <div class="music-player__info">
+        <h4 class="music-player__title" [title]="currentTrack.title">{{ currentTrack.title }}</h4>
+        <p class="music-player__artist" [title]="currentTrack.artist">{{ currentTrack.artist }}</p>
+      </div>
+    </div>
+    
+    <div class="music-player__center">
+      <div class="music-player__controls">
+        <button class="music-player__btn" (click)="prevTrack()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="music-player__btn music-player__btn--play" (click)="toggleGlobalPlay()">
+          <svg *ngIf="currentlyPlayingId !== currentTrack.id" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg *ngIf="currentlyPlayingId === currentTrack.id" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="music-player__btn" (click)="nextTrack()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+      </div>
+      <div class="music-player__progress">
+        <span class="music-player__time">{{ formatTime(currentTime) }}</span>
+        <input type="range" class="music-player__slider" [max]="duration" [value]="currentTime" (input)="onSeek($event)" [style.--progress]="duration ? (currentTime / duration * 100) + '%' : '0%'">
+        <span class="music-player__time">{{ formatTime(duration) }}</span>
+      </div>
+    </div>
+    
+    <div class="music-player__right">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      <input type="range" class="music-player__slider music-player__slider--vol" min="0" max="100" step="1" [value]="volume" (input)="onVolumeChange($event)" [style.--progress]="volume + '%'">
+    </div>
+  </div>
 </div>
+
+<div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px;"></div>

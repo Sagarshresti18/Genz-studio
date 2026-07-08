@@ -136,9 +136,12 @@ $light:   #f8fafc;
 
 // ── Left Panel ────────────────────────────────────────────────
 .tm-panel {
-  background: white; border: 1px solid $border;
-  border-radius: 16px; overflow: hidden;
+  background: #ffffff; 
+  border: 1px solid #f1f5f9;
+  border-radius: 20px; 
+  overflow: hidden;
   display: flex; flex-direction: column;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.03);
 }
 
 .panel-tabs {
@@ -174,10 +177,11 @@ $light:   #f8fafc;
 .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 
 .template-card {
-  border: 2px solid $border; border-radius: 9px;
-  overflow: hidden; cursor: pointer; background: none; padding: 0;
-  transition: all .15s;
-  &:hover { border-color: $accent; transform: translateY(-2px); }
+  border: 1px solid #f1f5f9; border-radius: 12px;
+  overflow: hidden; cursor: pointer; background: #ffffff; padding: 0;
+  transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  &:hover { border-color: #cbd5e1; transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08); }
 }
 
 .template-card__preview { height: 48px; width: 100%; }
@@ -273,8 +277,8 @@ $light:   #f8fafc;
 
 .tm-canvas {
   position: relative; width: 100%;
-  border-radius: 14px; overflow: hidden;
-  box-shadow: 0 8px 32px rgba(15,23,42,.14);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 12px 48px rgba(15,23,42,.08), 0 0 0 1px rgba(15,23,42,.04);
   user-select: none; touch-action: none;
   container-type: size;
 }
@@ -338,9 +342,10 @@ $light:   #f8fafc;
 
 // ── Right Tools ───────────────────────────────────────────────
 .tm-tools {
-  background: white; border: 1px solid $border;
-  border-radius: 16px; overflow: hidden;
+  background: #ffffff; border: 1px solid #f1f5f9;
+  border-radius: 20px; overflow: hidden;
   display: flex; flex-direction: column;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.03);
 }
 
 .tool-tabs {
