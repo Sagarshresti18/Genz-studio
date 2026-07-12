@@ -20,6 +20,56 @@
     <div class="nav-menu">
       <a href="#tools" class="nav-link-item">Tools</a>
       <a href="#creators" class="nav-link-item">Creators</a>
+
+      <!-- Theme Color Palette Selector Dropdown -->
+      <div class="theme-selector-container" [class.menu-open]="showThemeMenu()">
+        <button class="theme-palette-btn" (click)="$event.stopPropagation(); toggleThemeMenu()" title="Change Theme Accent Color">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C4.85857 19 4.5 20 3.5 20C2.5 20 2.5 21 3 21.5C3.5 22 5.5 22 6.5 22C7.5 22 8 21.5 8 21C8 20 9 19.5 10 19.5C11 19.5 11.5 20 12 20.5C12.5 21 12 22 12 22Z"/>
+            <circle cx="7.5" cy="10.5" r="1.5" fill="currentColor"/>
+            <circle cx="11.5" cy="7.5" r="1.5" fill="currentColor"/>
+            <circle cx="16.5" cy="9.5" r="1.5" fill="currentColor"/>
+            <circle cx="15.5" cy="14.5" r="1.5" fill="currentColor"/>
+          </svg>
+        </button>
+
+        @if (showThemeMenu()) {
+          <div class="theme-dropdown">
+            <div class="theme-dropdown-header">Accent Colors</div>
+            <div class="theme-colors-grid">
+              @for (t of accentThemes(); track t.id) {
+                <button class="color-dot-btn"
+                        [class.active]="t.id === activeThemeColor()"
+                        (click)="selectAccentTheme(t.id)"
+                        [style.background]="t.primaryColor"
+                        [title]="t.name">
+                  @if (t.id === activeThemeColor()) {
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Theme Toggle Button -->
+      <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        @if (isDarkMode()) {
+          <!-- Sun Icon -->
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        } @else {
+          <!-- Moon Icon -->
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        }
+      </button>
+
       <button class="nav-cta-btn" (click)="openModal('signup')">
         Get Started <span class="arrow-icon">→</span>
       </button>

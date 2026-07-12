@@ -15,9 +15,24 @@ export class LandingPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('heroCanvas') private canvasRef!: ElementRef<HTMLCanvasElement>;
   private animFrame: any;
 
-  // ── Navbar
+  // ── Navbar & Themes
   scrolled   = signal(false);
   mobileOpen = signal(false);
+  readonly showThemeMenu = signal(false);
+  readonly isDarkMode = signal<boolean>(
+    typeof window !== 'undefined' && (
+      localStorage.getItem('theme') === 'dark' ||
+      (!localStorage.getItem('theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    )
+  );
+  readonly activeThemeColor = signal<string>(typeof window !== 'undefined' ? localStorage.getItem('activeThemeColor') || 'violet' : 'violet');
+  readonly accentThemes = signal([
+    { id: 'violet', name: 'Violet', class: 'theme-violet', primaryColor: '#7C3AED' },
+    { id: 'blue', name: 'Blue', class: 'theme-blue', primaryColor: '#3B82F6' },
+    { id: 'emerald', name: 'Emerald', class: 'theme-emerald', primaryColor: '#10B981' },
+    { id: 'rose', name: 'Rose', class: 'theme-rose', primaryColor: '#F43F5E' },
+    { id: 'amber', name: 'Amber', class: 'theme-amber', primaryColor: '#F59E0B' }
+  ]);
 
   // ── Computed values for dynamic text loops (prevents complex DOM wrapping bugs)
   activeWordA = computed(() => this.heroA[this.heroIdx()]);
@@ -299,5 +314,45 @@ export class LandingPage implements OnInit, AfterViewInit, OnDestroy {
       this.closeModal();
       this.router.navigate(['/workspace/dashboard']);
     }, 1100);
+  }
+
+  toggleThemeMenu() {
+    this.showThemeMenu.update(v => !v);
+  }
+
+  selectAccentTheme(themeId: string) {
+    this.activeThemeColor.set(themeId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activeThemeColor', themeId);
+      const root = document.documentElement;
+      this.accentThemes().forEach(t => root.classList.remove(t.class));
+      const active = this.accentThemes().find(t => t.id === themeId);
+      if (active) {
+        root.classList.add(active.class);
+      }
+    }
+    this.showThemeMenu.set(false);
+  }
+
+  toggleTheme() {
+    const newVal = !this.isDarkMode();
+    this.isDarkMode.set(newVal);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newVal ? 'dark' : 'light');
+      const root = document.documentElement;
+      if (newVal) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.theme-selector-container')) {
+      this.showThemeMenu.set(false);
+    }
   }
 }

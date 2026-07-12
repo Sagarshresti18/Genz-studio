@@ -274,3 +274,50 @@
 .mb-4 {
   margin-bottom: var(--space-4);
 }
+
+// ── Dark Mode Style Overrides ────────────────────────────────
+:host-context(.dark) {
+  .auth-page {
+    background-color: #000000;
+  }
+
+  .auth-visual {
+    background: 
+      linear-gradient(135deg, rgba(var(--brand-primary-rgb), 0.04), rgba(var(--brand-secondary-rgb), 0.02)),
+      #050508;
+    border-right: 1px solid #141418;
+  }
+
+  .auth-form-panel {
+    background-color: #000000;
+  }
+
+  .auth-mockup {
+    background-color: #07070a;
+    border-color: #141418;
+  }
+
+  .mockup-line {
+    background-color: #18181c;
+  }
+
+  .google-btn, .input {
+    background-color: #07070a;
+    border-color: #141418;
+    color: #f9fafb;
+
+    &:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.15);
+    }
+  }
+
+  .auth-divider::before,
+  .auth-divider::after {
+    background-color: #141418;
+  }
+
+  .password-strength-bar {
+    background-color: #141418;
+  }
+}

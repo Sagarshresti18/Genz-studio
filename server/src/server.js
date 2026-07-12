@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { createServer } = require('node:http');
 
 const { env } = require('./config/env');
