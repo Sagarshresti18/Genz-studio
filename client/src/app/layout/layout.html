@@ -7,8 +7,8 @@
   <aside class="sidebar" [class.mobile-open]="mobileMenuOpen()">
 
     <div class="sidebar-header">
-      <div class="workspace-selector-container" [class.menu-open]="showWorkspaceMenu()">
-        <button class="workspace-btn" (click)="toggleWorkspaceMenu()">
+      <div class="workspace-selector-container" [class.menu-open]="showWorkspaceMenu() && workspaces().length > 1">
+        <button class="workspace-btn" (click)="workspaces().length > 1 && toggleWorkspaceMenu()" [style.cursor]="workspaces().length > 1 ? 'pointer' : 'default'">
           <div class="workspace-avatar" [style.background]="activeWorkspace().logoColor">
             {{ activeWorkspace().logoLetter }}
           </div>
@@ -17,9 +17,11 @@
               <span class="workspace-name">{{ activeWorkspace().name }}</span>
               <span class="workspace-role">{{ activeWorkspace().role }}</span>
             </div>
-            <svg class="workspace-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+            @if (workspaces().length > 1) {
+              <svg class="workspace-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            }
           @}
         </button>
 

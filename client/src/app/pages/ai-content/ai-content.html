@@ -30,141 +30,409 @@
        STUDIO TAB
   ══════════════════════════════════════════════════════════ -->
   @if (activeTab()==='studio') {
-    <div class="split">
+    <div class="chat-workspace">
 
-      <!-- ── Left: Controls ──────────────────────────────────── -->
-      <div class="controls">
-
-        <!-- Content Type -->
-        <div class="field-group">
-          <label class="field-label">Content type</label>
-          <div class="type-grid">
-            @for (t of contentTypes(); track t.key) {
-              <button class="type-tile" [class.type-tile--on]="selectedType()===t.key"
-                [style.--c]="t.color" (click)="selectedType.set(t.key)">
-                <span class="type-tile__ico">{{ t.icon }}</span>
-                <span class="type-tile__lbl">{{ t.label }}</span>
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Prompt -->
-        <div class="field-group">
-          <label class="field-label">Prompt</label>
-          <textarea class="textarea" rows="4"
-            placeholder="Describe what you want to create — be specific for better results..."
-            [value]="prompt()" (input)="prompt.set($any($event.target).value)"></textarea>
-        </div>
-
-        <!-- Tone -->
-        <div class="field-group">
-          <label class="field-label">Tone</label>
-          <div class="pill-row">
-            @for (t of tones(); track t) {
-              <button class="pill" [class.pill--on]="selectedTone()===t" (click)="selectedTone.set(t)">{{ t }}</button>
-            }
-          </div>
-        </div>
-
-        <!-- Platform + Keywords -->
-        <div class="row-2">
-          <div class="field-group">
-            <label class="field-label">Platform <span class="opt">optional</span></label>
-            <input class="input" type="text" placeholder="YouTube, TikTok..."
-              [value]="platform()" (input)="platform.set($any($event.target).value)" />
-          </div>
-          <div class="field-group">
-            <label class="field-label">Keywords <span class="opt">optional</span></label>
-            <input class="input" type="text" placeholder="growth, monetize..."
-              [value]="keywords()" (input)="keywords.set($any($event.target).value)" />
-          </div>
-        </div>
-
-        <!-- Generate -->
-        <button class="gen-btn" [disabled]="!prompt().trim()||isGenerating()" (click)="generate()">
-          @if (isGenerating()) {
-            <span class="spinner"></span>Generating...
-          } @else {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            Generate
-          }
-        </button>
-
-        <!-- Trending -->
-        <div class="field-group">
-          <label class="field-label">Trending topics</label>
-          <div class="trending-list">
-            @for (t of trendingTopics(); track t.topic) {
-              <button class="trending-row" (click)="useTrendingTopic(t)">
-                <div class="trending-row__left">
-                  <span class="trending-row__niche">{{ t.niche }}</span>
-                  <span class="trending-row__topic">{{ t.topic }}</span>
-                </div>
-                <span class="trending-row__badge">{{ t.trend }}</span>
-              </button>
-            }
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ── Right: Output ───────────────────────────────────── -->
-      <div class="output-pane">
-        <div class="output-bar">
-          <div class="output-bar__left">
-            <span class="output-bar__title">Output</span>
-            @if (streamedOutput()) {
-              <span class="output-bar__meta">{{ wordCount() }} words</span>
-            }
-            @if (selectedHistoryItem()) {
-              <span class="output-bar__from">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                From history
+      <!-- ==================== GREETING STATE ==================== -->
+      @if (!streamedOutput() && !isGenerating() && !activePrompt()) {
+        <div class="greeting-container animate-fadeIn">
+          
+          <!-- Greeting Header -->
+          <div class="greeting-header">
+            <div class="brand-logo-container">
+              <img src="https://4say.site/claude.png" alt="Logo" class="brand-logo" />
+            </div>
+            <h2 class="greeting-title">
+              {{ greeting() }}, 
+              <span class="highlight-name">
+                {{ userName() }}
+                <svg class="hand-underline" viewBox="0 0 140 24" fill="none" preserveAspectRatio="none">
+                  <path d="M6 16 Q 70 24, 134 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" />
+                </svg>
               </span>
+            </h2>
+          </div>
+
+          <!-- Chat Input Container -->
+          <div class="chat-box-wrapper">
+            <div class="chat-input-container">
+              <!-- Attached Snippets / Files Previews -->
+              @if (attachedFiles().length > 0 || pastedSnippets().length > 0) {
+                <div class="attachments-row">
+                  <!-- Snippet Cards -->
+                  @for (snippet of pastedSnippets(); track snippet.id) {
+                    <div class="pasted-card animate-fadeIn">
+                      <div class="pasted-card__body">
+                        <p class="pasted-card__text">{{ snippet.content }}</p>
+                      </div>
+                      <div class="pasted-card__footer">
+                        <span class="badge-tag">PASTED</span>
+                      </div>
+                      <button class="remove-btn" (click)="removePastedSnippet(snippet.id, $event)">×</button>
+                    </div>
+                  }
+
+                  <!-- File Cards -->
+                  @for (file of attachedFiles(); track file.id) {
+                    <div class="file-card animate-fadeIn">
+                      @if (file.preview) {
+                        <div class="file-card__image-wrap">
+                          <img [src]="file.preview" [alt]="file.name" class="file-card__image" />
+                        </div>
+                      } @else {
+                        <div class="file-card__doc-wrap">
+                          <span class="file-card__icon">📄</span>
+                          <span class="file-card__ext">{{ file.name.split('.').pop() | uppercase }}</span>
+                        </div>
+                      }
+                      <div class="file-card__info">
+                        <p class="file-card__name" [title]="file.name">{{ file.name }}</p>
+                        <p class="file-card__size">{{ formatFileSize(file.size) }}</p>
+                      </div>
+                      
+                      @if (file.uploadStatus === 'uploading') {
+                        <div class="file-card__loader">
+                          <span class="mini-spinner"></span>
+                        </div>
+                      }
+                      <button class="remove-btn" (click)="removeAttachedFile(file.id, $event)">×</button>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Text Input Area -->
+              <div class="input-area-wrap">
+                <textarea class="chat-textarea" rows="2"
+                  placeholder="Ask AI to write a script, hook, caption..."
+                  [value]="prompt()" 
+                  (input)="prompt.set($any($event.target).value)"
+                  (paste)="handlePaste($event)"></textarea>
+              </div>
+
+              <!-- Bottom Actions Bar -->
+              <div class="chat-actions-bar">
+                <!-- Left Action Items: Add File, Toggle Thinking -->
+                <div class="left-actions">
+                  <!-- Add Attachment Button -->
+                  <button type="button" class="action-btn" (click)="fileInput.click()" title="Attach file">
+                    <span class="icon">+</span>
+                  </button>
+                  <input #fileInput type="file" multiple class="hidden-input" (change)="onFileSelected($event)" />
+
+                  <!-- Extended Thinking Toggle Button -->
+                  <button type="button" class="action-btn" [class.action-btn--active]="isThinkingEnabled()" 
+                          (click)="toggleThinking()" title="Toggle Extended Thinking">
+                    <span class="icon">🧠</span>
+                    <span class="label">Thinking</span>
+                  </button>
+                </div>
+
+                <!-- Right Action Items: Model Selector & Send -->
+                <div class="right-actions">
+                  <!-- Model Selector Dropdown -->
+                  <div class="dropdown-wrapper">
+                    <button type="button" class="dropdown-trigger-btn" (click)="toggleModelDropdown($event)">
+                      <span>{{ selectedModel() === 'opus-4.5' ? 'Opus 4.5' : selectedModel() === 'sonnet-4.5' ? 'Sonnet 4.5' : 'Haiku 4.5' }}</span>
+                      <span class="arrow" [class.arrow--open]="isModelDropdownOpen()">▼</span>
+                    </button>
+
+                    @if (isModelDropdownOpen()) {
+                      <div class="dropdown-menu-list animate-fadeIn" (click)="$event.stopPropagation()">
+                        @for (model of models; track model.id) {
+                          <button type="button" class="dropdown-item" 
+                                  [class.dropdown-item--selected]="selectedModel() === model.id"
+                                  (click)="selectModel(model.id)">
+                            <div class="dropdown-item__meta">
+                              <span class="name">{{ model.name }}</span>
+                              <span class="desc">{{ model.description }}</span>
+                            </div>
+                            @if (selectedModel() === model.id) {
+                              <span class="check-mark">✓</span>
+                            }
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Premium Send Button -->
+                  <button type="button" class="send-submit-btn" 
+                          [disabled]="(!prompt().trim() && attachedFiles().length === 0 && pastedSnippets().length === 0) || isGenerating()" 
+                          (click)="generate()">
+                    @if (isGenerating()) {
+                      <span class="mini-spinner dark"></span>
+                    } @else {
+                      <span class="arrow-icon">↑</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suggestion Content Type Pills -->
+          <div class="suggestion-pills-container">
+            <span class="suggestion-pills-label">Content Type</span>
+            <div class="suggestion-pills">
+              @for (t of contentTypes(); track t.key) {
+                <button class="s-pill" [class.s-pill--active]="selectedType() === t.key"
+                        (click)="selectType(t.key)">
+                  <span class="s-pill__icon">{{ t.icon }}</span>
+                  <span class="s-pill__label">{{ t.label }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Collapsible Advanced Settings -->
+          <div class="advanced-settings-wrapper">
+            <button class="advanced-toggle" (click)="toggleAdvancedOptions()">
+              <span class="icon">{{ showAdvancedOptions() ? '▼' : '▶' }}</span>
+              <span>Advanced Options (Tone, Platform, Keywords)</span>
+            </button>
+
+            @if (showAdvancedOptions()) {
+              <div class="advanced-drawer-content animate-fadeIn">
+                <!-- Tone Pills -->
+                <div class="drawer-field">
+                  <label class="drawer-label">Writing Tone</label>
+                  <div class="tone-pills">
+                    @for (t of tones(); track t) {
+                      <button class="tone-pill" [class.tone-pill--active]="selectedTone() === t" 
+                              (click)="selectedTone.set(t)">{{ t }}</button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Platform + Keywords -->
+                <div class="drawer-row-2">
+                  <div class="drawer-field">
+                    <label class="drawer-label">Platform <span class="opt">optional</span></label>
+                    <input class="drawer-input" type="text" placeholder="YouTube, TikTok..."
+                           [value]="platform()" (input)="platform.set($any($event.target).value)" />
+                  </div>
+                  <div class="drawer-field">
+                    <label class="drawer-label">Keywords <span class="opt">optional</span></label>
+                    <input class="drawer-input" type="text" placeholder="growth, monetize..."
+                           [value]="keywords()" (input)="keywords.set($any($event.target).value)" />
+                  </div>
+                </div>
+
+                <!-- Trending Topics -->
+                <div class="drawer-field margin-top">
+                  <label class="drawer-label">Trending Topics</label>
+                  <div class="drawer-trending-list">
+                    @for (t of trendingTopics(); track t.topic) {
+                      <button class="trending-row" (click)="useTrendingTopic(t)">
+                        <div class="trending-row__left">
+                          <span class="trending-row__niche">{{ t.niche }}</span>
+                          <span class="trending-row__topic">{{ t.topic }}</span>
+                        </div>
+                        <span class="trending-row__badge">{{ t.trend }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
             }
           </div>
-          @if (streamedOutput()) {
-            <div class="output-bar__actions">
-              <button class="out-btn" (click)="copyOutput()">
-                @if (copied()) {
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  Copied
-                } @else {
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  Copy
-                }
-              </button>
-              <button class="out-btn out-btn--ghost" (click)="clearOutput()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                Clear
-              </button>
-            </div>
-          }
         </div>
+      }
 
-        <div class="output-body" #outputEl>
-          @if (!streamedOutput() && !isGenerating()) {
-            <div class="output-empty">
-              <div class="output-empty__icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <!-- ==================== CONVERSATION VIEW ==================== -->
+      @else {
+        <div class="conversation-feed animate-fadeIn">
+          
+          <div class="feed-header">
+            <button class="back-btn" (click)="newChat()">
+              <span>← New Chat</span>
+            </button>
+            <div class="feed-header__meta">
+              <span class="model-badge">{{ selectedModel() | uppercase }}</span>
+              @if (isThinkingEnabled()) {
+                <span class="thinking-badge">🧠 THINKING</span>
+              }
+            </div>
+          </div>
+
+          <!-- Message Thread -->
+          <div class="message-thread" #outputEl>
+            
+            <!-- User Prompt Message -->
+            <div class="message message--user">
+              <div class="message__bubble">
+                <!-- User Prompt Type Badge -->
+                <div class="prompt-meta-badge">
+                  {{ getTypeLabel(activeType()) }} • {{ activeTone() }}
+                </div>
+                
+                <!-- Prompt text -->
+                <p class="prompt-text-val">{{ activePrompt() }}</p>
+
+                <!-- Attached materials badges -->
+                @if (activeFiles().length > 0 || activeSnippets().length > 0) {
+                  <div class="attached-materials-badges">
+                    @for (file of activeFiles(); track file.name) {
+                      <span class="material-badge">
+                        📄 {{ file.name }}
+                      </span>
+                    }
+                    @for (snippet of activeSnippets(); track snippet.content) {
+                      <span class="material-badge">
+                        📝 Pasted snippet
+                      </span>
+                    }
+                  </div>
+                }
               </div>
-              <p>Ready to generate</p>
-              <span>Pick a content type, write your prompt, and hit Generate</span>
+            </div>
+
+            <!-- Assistant Response Message -->
+            <div class="message message--assistant">
+              <div class="message__avatar">
+                <img src="https://4say.site/claude.png" alt="AI" class="avatar-image" />
+              </div>
+              <div class="message__bubble-wrap">
+                <div class="message__bubble">
+                  <!-- Loading spinner if generating and no output yet -->
+                  @if (isGenerating() && !streamedOutput()) {
+                    <div class="output-loading">
+                      <div class="dots"><span></span><span></span><span></span></div>
+                      <p>Writing your content...</p>
+                    </div>
+                  }
+                  
+                  <!-- Streamed Output Markdown Text -->
+                  @if (streamedOutput()) {
+                    <div class="markdown-output" [innerHTML]="streamedOutput() | markdownToHtml"></div>
+                    @if (isGenerating()) {
+                      <span class="cursor">▋</span>
+                    }
+                  }
+                </div>
+
+                <!-- Bubble action bar -->
+                @if (streamedOutput() && !isGenerating()) {
+                  <div class="bubble-actions animate-fadeIn">
+                    <span class="word-count">{{ wordCount() }} words</span>
+                    <div class="actions-group">
+                      <button class="act-btn" (click)="copyOutput()">
+                        @if (copied()) {
+                          <span class="green">✓ Copied</span>
+                        } @else {
+                          <span>Copy Content</span>
+                        }
+                      </button>
+                      <button class="act-btn act-btn--danger" (click)="newChat()">
+                        <span>New Chat</span>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Follow-up Input Bar -->
+          @if (!isGenerating()) {
+            <div class="bottom-input-bar-container animate-fadeIn">
+              <div class="chat-input-container">
+                <!-- Attached Previews -->
+                @if (attachedFiles().length > 0 || pastedSnippets().length > 0) {
+                  <div class="attachments-row">
+                    <!-- Snippet Cards -->
+                    @for (snippet of pastedSnippets(); track snippet.id) {
+                      <div class="pasted-card animate-fadeIn">
+                        <div class="pasted-card__body">
+                          <p class="pasted-card__text">{{ snippet.content }}</p>
+                        </div>
+                        <div class="pasted-card__footer">
+                          <span class="badge-tag">PASTED</span>
+                        </div>
+                        <button class="remove-btn" (click)="removePastedSnippet(snippet.id, $event)">×</button>
+                      </div>
+                    }
+
+                    <!-- File Cards -->
+                    @for (file of attachedFiles(); track file.id) {
+                      <div class="file-card animate-fadeIn">
+                        @if (file.preview) {
+                          <div class="file-card__image-wrap">
+                            <img [src]="file.preview" [alt]="file.name" class="file-card__image" />
+                          </div>
+                        } @else {
+                          <div class="file-card__doc-wrap">
+                            <span class="file-card__icon">📄</span>
+                            <span class="file-card__ext">{{ file.name.split('.').pop() | uppercase }}</span>
+                          </div>
+                        }
+                        <div class="file-card__info">
+                          <p class="file-card__name" [title]="file.name">{{ file.name }}</p>
+                          <p class="file-card__size">{{ formatFileSize(file.size) }}</p>
+                        </div>
+                        <button class="remove-btn" (click)="removeAttachedFile(file.id, $event)">×</button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <div class="input-area-wrap">
+                  <textarea class="chat-textarea" rows="2"
+                            placeholder="Type follow-up instructions..."
+                            [value]="prompt()" 
+                            (input)="prompt.set($any($event.target).value)"
+                            (paste)="handlePaste($event)"></textarea>
+                </div>
+
+                <div class="chat-actions-bar">
+                  <div class="left-actions">
+                    <button type="button" class="action-btn" (click)="followFileInput.click()" title="Attach file">
+                      <span class="icon">+</span>
+                    </button>
+                    <input #followFileInput type="file" multiple class="hidden-input" (change)="onFileSelected($event)" />
+
+                    <button type="button" class="action-btn" [class.action-btn--active]="isThinkingEnabled()" 
+                            (click)="toggleThinking()" title="Toggle Thinking">
+                      <span class="icon">🧠</span>
+                    </button>
+                  </div>
+
+                  <div class="right-actions">
+                    <!-- Dropdown Wrapper -->
+                    <div class="dropdown-wrapper">
+                      <button type="button" class="dropdown-trigger-btn" (click)="toggleModelDropdown($event)">
+                        <span>{{ selectedModel() === 'opus-4.5' ? 'Opus 4.5' : selectedModel() === 'sonnet-4.5' ? 'Sonnet 4.5' : 'Haiku 4.5' }}</span>
+                      </button>
+
+                      @if (isModelDropdownOpen()) {
+                        <div class="dropdown-menu-list animate-fadeIn" (click)="$event.stopPropagation()">
+                          @for (model of models; track model.id) {
+                            <button type="button" class="dropdown-item" 
+                                    [class.dropdown-item--selected]="selectedModel() === model.id"
+                                    (click)="selectModel(model.id)">
+                              <div class="dropdown-item__meta">
+                                <span class="name">{{ model.name }}</span>
+                              </div>
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <button type="button" class="send-submit-btn" 
+                            [disabled]="!prompt().trim() && attachedFiles().length === 0 && pastedSnippets().length === 0" 
+                            (click)="generate()">
+                      <span class="arrow-icon">↑</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           }
-          @if (isGenerating() && !streamedOutput()) {
-            <div class="output-loading">
-              <div class="dots"><span></span><span></span><span></span></div>
-              <p>Writing your content...</p>
-            </div>
-          }
-          @if (streamedOutput()) {
-            <div class="output-text" [innerHTML]="streamedOutput() | markdownToHtml"></div>
-            @if (isGenerating()) { <span class="cursor">▋</span> }
-          }
+
         </div>
-      </div>
+      }
 
     </div>
   }
