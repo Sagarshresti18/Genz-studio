@@ -1,16 +1,139 @@
-<div class="feature-page">
-  <div class="feature-hero" style="--accent:#8B5CF6">
-    <div class="feature-hero__glow"></div>
-    <span class="feature-hero__icon">♪</span>
-    <h1 class="feature-hero__title">AI Audio Generator</h1>
-    <p class="feature-hero__sub">Generate realistic voiceovers, sound effects, and custom audio tracks from a simple text prompt.</p>
-    <button class="feature-hero__btn">Generate Audio</button>
+<div class="audio-studio-container">
+  <div class="studio-header">
+    <h1 class="page-title">AI Audio Studio</h1>
+    <p class="page-subtitle">Generate studio-quality AI voiceovers from your text instantly.</p>
   </div>
-  <div class="feature-placeholder">
-    <div class="ph-card" *ngFor="let i of items">
-      <div class="ph-thumb" style="background:linear-gradient(135deg,#8B5CF622,#8B5CF644)"></div>
-      <div class="ph-line ph-line--lg"></div>
-      <div class="ph-line ph-line--sm"></div>
+
+  <div class="studio-layout">
+    
+    <!-- Editor Card -->
+    <div class="glass-card editor-card">
+      <div class="card-header">
+        <h3>Your Script</h3>
+        <span class="char-count">{{scriptText.length}} / 5000 characters</span>
+      </div>
+      <textarea 
+        class="script-editor" 
+        [(ngModel)]="scriptText" 
+        placeholder="Type or paste your script here to generate professional audio..."></textarea>
     </div>
+
+    <!-- Settings Panel (All settings combined) -->
+    <div class="settings-panel">
+      <div class="glass-card">
+        <h3>Voice Settings</h3>
+        
+        <div class="form-group">
+          <label>Language</label>
+          <select class="form-control" [(ngModel)]="selectedLanguage">
+            <option *ngFor="let lang of languages" [value]="lang">{{lang}}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Select Voice</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select class="form-control" [(ngModel)]="selectedVoiceId" style="flex: 1;">
+              <option *ngFor="let voice of voices" [value]="voice.id">
+                {{voice.name}} ({{voice.gender}})
+              </option>
+            </select>
+            <!-- Voice Preview Button -->
+            <button class="btn-preview" (click)="toggleVoicePreview($event, selectedVoiceId)" title="Preview Selected Voice">
+              <svg *ngIf="playingVoiceId !== selectedVoiceId" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg *ngIf="playingVoiceId === selectedVoiceId" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="6" width="4" height="12"/><rect x="14" y="6" width="4" height="12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="selectedVoiceId === 'custom'">
+          <div class="custom-voice-upload">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <p>Upload a 30s sample of your voice to clone it.</p>
+            <button class="btn btn-outline btn-sm">Upload Audio</button>
+          </div>
+        </div>
+
+        <hr class="settings-divider">
+        
+        <div class="form-group">
+          <label>Emotion Mode</label>
+          <select class="form-control" [(ngModel)]="selectedEmotion">
+            <option *ngFor="let em of emotions" [value]="em">{{em}}</option>
+          </select>
+        </div>
+
+        <div class="form-group toggle-group">
+          <div>
+            <label style="margin-bottom:0">Singing Mode</label>
+            <p class="help-text" style="margin: 2px 0 0 0">The AI will sing your script</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="isSingingMode">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <div class="slider-header">
+            <label>Voice Similarity</label>
+            <span>{{voiceSettings.similarity}}%</span>
+          </div>
+          <input type="range" class="range-slider" min="0" max="100" [(ngModel)]="voiceSettings.similarity">
+          <p class="help-text">Higher values make it sound more like the selected/cloned voice.</p>
+        </div>
+
+        <div class="form-group">
+          <div class="slider-header">
+            <label>Speed</label>
+            <span>{{voiceSettings.speed}}x</span>
+          </div>
+          <input type="range" class="range-slider" min="0.5" max="2.0" step="0.1" [(ngModel)]="voiceSettings.speed">
+        </div>
+
+        <div class="form-group">
+          <div class="slider-header">
+            <label>Pitch</label>
+            <span>{{voiceSettings.pitch}}</span>
+          </div>
+          <input type="range" class="range-slider" min="-10" max="10" step="1" [(ngModel)]="voiceSettings.pitch">
+        </div>
+      </div>
+    </div>
+
+    <!-- Generation Card -->
+    <div class="glass-card generation-card">
+      <button class="btn btn-primary btn-generate" (click)="generateAudio()" [disabled]="isGenerating || !scriptText">
+        <span *ngIf="!isGenerating">Generate Audio</span>
+        <span *ngIf="isGenerating">Processing...</span>
+      </button>
+
+      <!-- Loading state -->
+      <div class="processing-state" *ngIf="isGenerating">
+        <div class="waveform-anim">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <p>Synthesizing AI Audio...</p>
+      </div>
+
+      <!-- Audio Player Mockup -->
+      <div class="player-wrapper" *ngIf="generatedAudioReady">
+        <div class="audio-player">
+          <button class="btn-icon play-btn">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="progress-bar-container">
+            <div class="progress-bg">
+              <div class="progress-fill" style="width: 30%"></div>
+            </div>
+          </div>
+          <span class="time">00:12 / 01:45</span>
+          <button class="btn-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
