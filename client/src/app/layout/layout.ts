@@ -78,9 +78,7 @@ export class WorkspaceLayoutComponent {
 
   // ── Workspaces ───────────────────────────────────────────
   protected readonly workspaces = signal<Workspace[]>([
-    { id: 'genz-studio', name: 'GenZ Studio', role: 'Owner', logoColor: 'linear-gradient(135deg, #7C3AED, #06B6D4)', logoLetter: 'GZ' },
-    { id: 'acme-agency', name: 'Acme Agency', role: 'Collaborator', logoColor: 'linear-gradient(135deg, #EF4444, #F59E0B)', logoLetter: 'AC' },
-    { id: 'personal-space', name: 'Personal Space', role: 'Personal', logoColor: 'linear-gradient(135deg, #10B981, #3B82F6)', logoLetter: 'PS' }
+    { id: 'genz-studio', name: 'GenZ Studio', role: 'Owner', logoColor: 'linear-gradient(135deg, #7C3AED, #06B6D4)', logoLetter: 'GZ' }
   ]);
   protected readonly activeWorkspaceId = signal<string>(localStorage.getItem('activeWorkspaceId') || 'genz-studio');
   protected readonly activeWorkspace = computed(() => {
