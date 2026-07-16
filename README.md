@@ -6,12 +6,12 @@ An AI-powered creator platform for designing YouTube banners, thumbnails, profil
 
 **Backend**: Node.js + Express API (JavaScript)  
 **Frontend**: Angular 18+ standalone components with white/light UI theme  
-**Database**: PostgreSQL (Neon optional)
+**Database**: PostgreSQL on Neon (Highly modular, feature-based schema architecture)
 
 ## What This Repo Contains
 
 - `client/` - Angular 18+ frontend with standalone components
-- `server/` - Express.js backend in plain JavaScript
+- `server/` - Express.js backend with feature-driven modular database schemas
 - `docs/` - Architecture and development guides
 
 ## Prerequisites
@@ -106,6 +106,15 @@ The Angular app runs at:
 
 ```text
 http://localhost:4200
+```
+
+## Initialize the Database
+
+Before starting the backend, make sure to initialize your Neon PostgreSQL tables:
+
+```bash
+cd server
+npm run db:init
 ```
 
 ## Run the Backend

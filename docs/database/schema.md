@@ -1,23 +1,31 @@
-# Schema
+# Database Schema
 
-This schema file will grow as the backend data model is implemented.
+GenZ Studio utilizes a highly modular schema architecture that mirrors the codebase structure. Instead of a large monolithic schema file, the database tables are defined within their respective feature modules.
 
-## Planned Core Tables
+## Initialization Workflow
 
-- `users` for account identity and profile data.
-- `sessions` for login or refresh token tracking if needed.
-- `projects` for user-created design or content work.
-- `assets` for uploaded or generated files.
-- `generation_jobs` for prompt-driven output tracking.
+The database is built using an automated initialization script:
+`npm run db:init` (located at `server/src/scripts/init-db.js`)
 
-## Common Columns
+1. **Core Schemas First**: The script initially executes the schema files for `users` and `projects`. These core tables must exist first because nearly all other feature tables include foreign key constraints pointing to them.
+2. **Feature Schemas Next**: The script then dynamically traverses all remaining folders within `server/src/features/` and executes any `schema.sql` file it finds.
 
-- `id` as the primary key.
-- `created_at` and `updated_at` timestamps.
-- Foreign keys for ownership and relationship links.
+## Implemented Tables
 
-## Notes
+- **Core**:
+  - `users` (Authentication, profiles)
+  - `projects` (Workspaces, dashboards)
+- **Features**:
+  - `logos` (Logo generator feature)
+  - `youtube_banners` (YouTube banner generator)
+  - `thumbnails` (Thumbnail maker)
+  - `image_edits` (Image editor operations)
+  - `video_projects` (Video editor)
+  - `ai_videos` (AI video generation)
+  - `ai_audio` (AI audio/voiceovers)
+  - `ai_content` (AI text and prompt generation)
+  - `calendar_posts` (Content calendar scheduling)
+  - `meme_templates` & `user_memes` (Meme library)
+  - `music_tracks` & `music_favorites` (Music library)
 
-- Add indexes for lookup-heavy columns such as `user_id` and `project_id`.
-- Keep sensitive values out of the schema when possible.
-- Normalize only when it improves clarity or consistency.
+*Note: The backend avoids storing raw binary media data in the database. Instead, media files are stored separately (e.g. cloud storage or local disk) and only their paths/URLs (`output_url`, `source_url`, etc.) are tracked inside the database.*
