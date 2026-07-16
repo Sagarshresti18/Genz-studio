@@ -75,5 +75,13 @@ export const routes: Routes = [
       },
     ]
   },
+  {
+    path: 'chatbox-demo',
+    loadComponent: () => import('./pages/chatbox-demo/chatbox-demo').then(m => m.ChatboxDemo)
+  },
+  {
+    path: 'hero-demo',
+    loadComponent: () => import('./shared/components/ui/scroll-morph-hero/scroll-morph-hero').then(m => m.ScrollMorphHero)
+  },
   { path: '**', redirectTo: '' }
 ];
