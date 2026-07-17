@@ -2,6 +2,7 @@
 // GenZ Studio — Global Styles
 // ============================================================
 
+
 // ── Google Fonts ─────────────────────────────────────────────
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -750,35 +751,4 @@ textarea {
   --theme-color-secondary-rgb: 16, 185, 129;
 }
 
-// ── Background Cursor Aura Tracking Glow ──────────────────────
-body {
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
-    background: radial-gradient(
-      120px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-      rgba(var(--brand-primary-rgb), 0.12),
-      transparent 80%
-    );
-    transition: background 0.3s ease;
-  }
-}
-
-:root.dark body::before {
-  background: 
-    radial-gradient(
-      80px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-      rgba(var(--brand-primary-rgb), 0.24),
-      transparent 80%
-    ),
-    radial-gradient(
-      200px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-      rgba(var(--brand-primary-rgb), 0.08),
-      transparent 80%
-    );
-}
+// Styles completed

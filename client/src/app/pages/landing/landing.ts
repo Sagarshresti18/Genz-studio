@@ -19,12 +19,7 @@ export class LandingPage implements OnInit, AfterViewInit, OnDestroy {
   scrolled   = signal(false);
   mobileOpen = signal(false);
   readonly showThemeMenu = signal(false);
-  readonly isDarkMode = signal<boolean>(
-    typeof window !== 'undefined' && (
-      localStorage.getItem('theme') === 'dark' ||
-      (!localStorage.getItem('theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    )
-  );
+  readonly isDarkMode = signal<boolean>(false);
   readonly activeThemeColor = signal<string>(typeof window !== 'undefined' ? localStorage.getItem('activeThemeColor') || 'violet' : 'violet');
   readonly accentThemes = signal([
     { id: 'violet', name: 'Violet', class: 'theme-violet', primaryColor: '#7C3AED' },
@@ -335,16 +330,11 @@ export class LandingPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleTheme() {
-    const newVal = !this.isDarkMode();
-    this.isDarkMode.set(newVal);
+    this.isDarkMode.set(false);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', newVal ? 'dark' : 'light');
+      localStorage.setItem('theme', 'light');
       const root = document.documentElement;
-      if (newVal) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
+      root.classList.remove('dark');
     }
   }
 
