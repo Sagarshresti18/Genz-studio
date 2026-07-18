@@ -27,6 +27,7 @@ const envSchema = z.object({
   OPENAI_API_KEY:    optionalStr,
   STABILITY_API_KEY: optionalStr,
   GEMINI_API_KEY:    optionalStr,
+  GIPHY_API_KEY:     optionalStr,
   IMGFLIP_USERNAME:  optionalStr,
   IMGFLIP_PASSWORD:  optionalStr,
 });

@@ -30,7 +30,9 @@ const { proxyImage, generateTemplateImage } = require('./features/meme-library/m
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 // Allow local dev ports (4200 and 4300) during development
 const devOrigins = ['http://localhost:4200', 'http://localhost:4300'];
 app.use(cors({ origin: env.NODE_ENV === 'production' ? false : (origin, cb) => cb(null, devOrigins.includes(origin)), credentials: true }));

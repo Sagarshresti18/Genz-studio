@@ -1,305 +1,213 @@
 <div class="ml">
 
-  @if (toast()) {
-    <div class="toast" [class.toast--err]="toast()!.type==='error'">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        @if (toast()!.type==='success') { <polyline points="20 6 9 17 4 12"/> }
-        @else { <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/> }
-      </svg>
-      {{ toast()!.msg }}
-    </div>
-  }
-
   <!-- Header -->
   <div class="page-header">
     <div>
       <h1 class="page-title">Meme Library</h1>
-      <p class="page-desc">Browse templates · Drag text anywhere · AI captions · Export</p>
+      <p class="page-desc">Browse and search trending memes from Reddit subreddits</p>
     </div>
     <div class="header-actions">
-      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='browse'" (click)="switchTab('browse')">Browse</button>
-      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='editor'" (click)="switchTab('editor')" [disabled]="!selectedTemplate()">
-        Editor @if (selectedTemplate()) { <span class="tab-dot"></span> }
-      </button>
-      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='mine'" (click)="switchTab('mine')">
-        My Memes @if (myMemes().length) { <span class="count-badge">{{ myMemes().length }}</span> }
+      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='explorer'" (click)="switchTab('explorer')">Explore Reddit</button>
+      <button class="tab-btn" [class.tab-btn--on]="activeTab()==='favorites'" (click)="switchTab('favorites')">
+        Bookmarks @if (favorites().length) { <span class="count-badge">{{ favorites().length }}</span> }
       </button>
     </div>
   </div>
 
-  <!-- ══ BROWSE ══════════════════════════════════════════════ -->
-  @if (activeTab()==='browse') {
-    <div class="browse">
+  <!-- ══ EXPLORER ════════════════════════════════════════════ -->
+  @if (activeTab() === 'explorer') {
+    <div class="browse" (scroll)="onScroll($event)">
       <div class="browse-toolbar">
         <div class="search-box">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search templates..."
-            [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="text" class="input" placeholder="Paste image URL from Google/Pinterest/any source"
-            [value]="customImageUrl()" (input)="customImageUrl.set($any($event.target).value)" />
-          <button class="out-btn" (click)="addCustomImage()">Load Image</button>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" (click)="loadRedditMemes(false)" style="cursor: pointer;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" [placeholder]="(redditSubreddit() === 'gifs+reactiongifs+wholesomegifs' || redditSubreddit() === 'stickers') ? 'Search Instagram GIFs & Stickers (press Enter)...' : 'Filter memes...'"
+            [value]="searchQueryReddit()" 
+            (input)="searchQueryReddit.set($any($event.target).value)"
+            (keyup.enter)="loadRedditMemes(false)" />
         </div>
         <div class="cat-row">
-          @for (c of categories; track c.key) {
-            <button class="cat-btn" [class.cat-btn--on]="activeCategory()===c.key" (click)="activeCategory.set(c.key)">
-              {{ c.label }}
+          @for (sub of redditSubreddits; track sub.key) {
+            <button class="cat-btn" [class.cat-btn--on]="redditSubreddit()===sub.key" (click)="onSubredditChange(sub.key)">
+              {{ sub.label }}
             </button>
           }
         </div>
+        @if (redditSubreddit() === 'gifs+reactiongifs+wholesomegifs' || redditSubreddit() === 'stickers' || redditSubreddit() === 'all') {
+          <div class="quick-tags">
+            <span class="quick-tags__title">Indian Stars:</span>
+            <div class="quick-tags__row">
+              @for (tag of indianCelebrityTags; track tag) {
+                <button class="quick-tags__btn" [class.quick-tags__btn--active]="searchQueryReddit() === tag" (click)="selectCelebrityTag(tag)">
+                  {{ tag }}
+                </button>
+              }
+            </div>
+          </div>
+        }
       </div>
 
-      @if (!searchQuery() && activeCategory()==='all' && trendingTemplates().length) {
-        <div class="strip-section">
-          <div class="section-label"><span>Trending</span><span class="section-sub">Most used this week</span></div>
-          <div class="trending-strip">
-            @for (t of trendingTemplates(); track t.id) {
-              <div class="strip-card" (click)="selectTemplate(t)">
-                <div class="strip-card__img">
-                  <img [src]="t.url" [alt]="t.name" loading="lazy" (error)="onImageError($event)" />
-                  <div class="strip-card__hover">Use</div>
-                </div>
-                <p class="strip-card__name">{{ t.name }}</p>
-              </div>
-            }
-          </div>
+      @if (errorReddit()) {
+        <div class="error-state glass-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-error"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>{{ errorReddit() }}</p>
+          <button class="out-btn" (click)="loadRedditMemes(false)">Retry</button>
         </div>
       }
 
-      <div class="section-label" style="margin-top:4px">
-        <span>{{ activeCategory()==='all' && !searchQuery() ? 'All Templates' : 'Results' }}</span>
-        <span class="section-sub">{{ filteredTemplates().length }} templates</span>
-      </div>
-
-      @if (loadingTemplates()) {
-        <div class="meme-grid">
-          @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) { <div class="m-skeleton"></div> }
-        </div>
-      } @else if (!filteredTemplates().length) {
-        <div class="empty-state">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <p>No templates found</p>
-        </div>
-      } @else {
-        <div class="meme-grid">
-          @for (t of filteredTemplates(); track t.id) {
-            <div class="m-card" (click)="selectTemplate(t)">
-              @if (t.trending) { <span class="m-card__hot">Trending</span> }
-              @if (t.category==='bollywood') { <span class="m-card__bw">Bollywood</span> }
-              <div class="m-card__img">
-                <img [src]="t.url" [alt]="t.name" loading="lazy" (error)="onImageError($event)" />
-                <div class="m-card__overlay"><span>Use Template</span></div>
-              </div>
-              <div class="m-card__foot">
-                <p class="m-card__name">{{ t.name }}</p>
-                <span class="m-card__cat">{{ t.category }}</span>
+      <div class="reddit-grid">
+        @for (m of filteredRedditMemes(); track m.url) {
+          <div class="reddit-card glass-card" (click)="openPreview(m, $event)">
+            <div class="reddit-card__img-wrap" [class.transparent-pattern]="m.subreddit === 'stickers'">
+              <img [src]="m.url" [alt]="m.title" loading="lazy" class="reddit-card__img" />
+              <div class="reddit-card__overlay">
+                <button class="icon-action-btn" (click)="toggleBookmark(m, $event)" [title]="isBookmarked(m) ? 'Remove bookmark' : 'Bookmark meme'">
+                  <svg width="15" height="15" viewBox="0 0 24 24" [attr.fill]="isBookmarked(m) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </button>
+                <button class="icon-action-btn" (click)="downloadMemeFile(m, $event)" title="Download image">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <button class="icon-action-btn" (click)="shareMeme(m, $event)" title="Share meme">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
               </div>
             </div>
+            <div class="reddit-card__info">
+              <h4 class="reddit-card__title">{{ m.title }}</h4>
+              <div class="reddit-card__meta">
+                <span class="reddit-card__sub">r/{{ m.subreddit }}</span>
+                <span class="reddit-card__score">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  {{ m.ups | number }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (loadingReddit()) {
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="reddit-skeleton glass-card">
+              <div class="reddit-skeleton__img skeleton"></div>
+              <div class="reddit-skeleton__meta skeleton"></div>
+            </div>
           }
+        }
+      </div>
+
+      @if (!loadingReddit() && !filteredRedditMemes().length && !errorReddit()) {
+        <div class="empty-state">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <p>No memes found</p>
         </div>
-        <div style="display:flex;justify-content:center;margin-top:12px">
-          <button class="ghost-btn" (click)="loadMoreTemplates()">Load more templates</button>
+      }
+
+      @if (!loadingReddit() && filteredRedditMemes().length > 0 && !errorReddit()) {
+        <div style="display:flex;justify-content:center;margin-top:16px;margin-bottom:16px;">
+          <button class="ghost-btn" (click)="loadMoreMemes()">Load more memes</button>
         </div>
       }
     </div>
   }
 
-  <!-- ══ EDITOR ══════════════════════════════════════════════ -->
-  @if (activeTab()==='editor') {
-    @if (!selectedTemplate()) {
-      <div class="empty-state" style="flex:1">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        <p>No template selected</p>
-        <button class="primary-btn" (click)="switchTab('browse')">Browse Templates</button>
-      </div>
-    } @else {
-      <div class="editor">
-
-        <!-- Canvas Preview -->
-        <div class="editor__canvas-col">
-          <div class="canvas-hint">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l4 4 10-10"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
-            Drag text labels directly on the image
-          </div>
-          <div class="canvas-wrap" #canvasWrap>
-            <canvas #canvas class="meme-canvas"></canvas>
-          </div>
-          <div class="canvas-actions">
-            <button class="ghost-btn" (click)="switchTab('browse')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-              Back
-            </button>
-            <button class="out-btn" (click)="downloadMeme()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download
-            </button>
-            <button class="primary-btn" style="flex:1" [disabled]="isRemixing()" (click)="remix()">
-              @if (isRemixing()) { <span class="spinner"></span>Saving... }
-              @else {
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Save Meme
-              }
-            </button>
-          </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="editor__ctrl">
-
-          <!-- Text Labels List -->
-          <div class="field-group">
-            <div class="ctrl-row">
-              <label class="field-label" style="margin:0">Text Labels</label>
-              <button class="add-label-btn" (click)="addLabel()">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add
-              </button>
-            </div>
-            <div class="label-list">
-              @for (label of labels(); track label.id) {
-                <div class="label-row" [class.label-row--on]="selectedLabelId()===label.id"
-                  (click)="selectedLabelId.set(label.id)">
-                  <span class="label-row__preview">{{ label.text || 'Empty' }}</span>
-                  @if (labels().length > 1) {
-                    <button class="del-btn" (click)="removeLabel(label.id); $event.stopPropagation()">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-
-          <!-- Selected Label Controls -->
-          @if (selectedLabel()) {
-            <div class="field-group">
-              <label class="field-label">Text</label>
-              <input class="input" type="text" placeholder="Type your caption..."
-                [value]="selectedLabel().text"
-                (input)="updateLabel('text', $any($event.target).value)" />
-            </div>
-
-            <div class="row-2">
-              <div class="field-group">
-                <label class="field-label">Color</label>
-                <div class="color-row">
-                  @for (c of ['#ffffff','#000000','#ffff00','#ff0000','#00ff00','#00bfff','#ff69b4']; track c) {
-                    <button class="color-swatch" [style.background]="c"
-                      [class.color-swatch--on]="selectedLabel().color===c"
-                      (click)="updateLabel('color', c)"></button>
-                  }
-                  <input class="color-pick" type="color" [value]="selectedLabel().color"
-                    (input)="updateLabel('color', $any($event.target).value)" title="Custom color" />
-                </div>
-              </div>
-              <div class="field-group">
-                <label class="field-label">Size</label>
-                <div class="size-row">
-                  @for (s of fontSizes; track s) {
-                    <button class="size-btn" [class.size-btn--on]="selectedLabel().size===s"
-                      (click)="updateLabel('size', s)">{{ s }}</button>
-                  }
-                </div>
-              </div>
-            </div>
-
-            <div class="toggle-row">
-              <button class="toggle-btn" [class.toggle-btn--on]="selectedLabel().bold"
-                (click)="updateLabel('bold', !selectedLabel().bold)">
-                <strong>B</strong> Bold
-              </button>
-              <button class="toggle-btn" [class.toggle-btn--on]="selectedLabel().shadow"
-                (click)="updateLabel('shadow', !selectedLabel().shadow)">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                Outline
-              </button>
-            </div>
-          }
-
-          <!-- AI Captions -->
-          <div class="ai-block">
-            <div class="ai-block__head">
-              <span class="ai-tag">AI</span>
-              <span class="field-label" style="margin:0">Caption suggestions</span>
-            </div>
-            <input class="input" type="text" placeholder="Context (optional)..."
-              [value]="aiContext()" (input)="aiContext.set($any($event.target).value)" />
-            <div class="pill-row">
-              @for (t of aiTones; track t) {
-                <button class="pill" [class.pill--on]="aiTone()===t" (click)="aiTone.set(t)">{{ t }}</button>
-              }
-            </div>
-            <button class="ai-gen-btn" [disabled]="loadingCaptions()" (click)="generateAiCaptions()">
-              @if (loadingCaptions()) { <span class="spinner"></span>Generating... }
-              @else {
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Generate captions
-              }
-            </button>
-            @if (aiCaptions().length) {
-              <div class="caption-list">
-                @for (cap of aiCaptions(); track $index) {
-                  <button class="caption-row" (click)="applyCaption(cap)">
-                    <span class="caption-row__n">{{ $index + 1 }}</span>
-                    <div class="caption-row__txt">
-                      <span>{{ cap.top }}</span>
-                      <span>{{ cap.bottom }}</span>
-                    </div>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                  </button>
-                }
-              </div>
-            }
-          </div>
-
+  <!-- ══ BOOKMARKS / FAVORITES ═══════════════════════════════ -->
+  @if (activeTab() === 'favorites') {
+    <div class="browse">
+      <div class="browse-toolbar">
+        <div class="search-box">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search bookmarked memes..."
+            [value]="searchQueryReddit()" (input)="searchQueryReddit.set($any($event.target).value)" />
         </div>
       </div>
-    }
-  }
 
-  <!-- ══ MY MEMES ════════════════════════════════════════════ -->
-  @if (activeTab()==='mine') {
-    <div class="mine">
-      @if (loadingMemes()) {
-        <div class="meme-grid">
-          @for (i of [1,2,3,4,5,6]; track i) { <div class="m-skeleton"></div> }
-        </div>
-      } @else if (!myMemes().length) {
-        <div class="empty-state" style="flex:1">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <p>No memes yet</p>
-          <span>Create your first meme from the Browse tab</span>
-          <button class="primary-btn" style="margin-top:8px" (click)="switchTab('browse')">Browse Templates</button>
-        </div>
-      } @else {
-        <div class="mine-grid">
-          @for (meme of myMemes(); track meme.id) {
-            <div class="mine-card">
-              @if (meme.output_url) {
-                <img [src]="meme.output_url" [alt]="meme.top_text" class="mine-card__img" />
-              } @else {
-                <div class="mine-card__ph">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  <p>{{ meme.top_text || 'Untitled' }}</p>
-                </div>
-              }
-              <div class="mine-card__foot">
-                <div class="mine-card__txt">
-                  @if (meme.top_text) { <span>{{ meme.top_text }}</span> }
-                  @if (meme.bottom_text) { <span>{{ meme.bottom_text }}</span> }
-                </div>
-                <div class="mine-card__row">
-                  <span class="mine-card__date">{{ formatDate(meme.created_at) }}</span>
-                  <button class="del-btn" (click)="deleteMeme(meme,$event)">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                  </button>
-                </div>
+      <div class="reddit-grid">
+        @for (m of filteredFavorites(); track m.url) {
+          <div class="reddit-card glass-card" (click)="openPreview(m, $event)">
+            <div class="reddit-card__img-wrap" [class.transparent-pattern]="m.subreddit === 'stickers'">
+              <img [src]="m.url" [alt]="m.title" loading="lazy" class="reddit-card__img" />
+              <div class="reddit-card__overlay">
+                <button class="icon-action-btn" (click)="toggleBookmark(m, $event)" title="Remove bookmark">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </button>
+                <button class="icon-action-btn" (click)="downloadMemeFile(m, $event)" title="Download image">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <button class="icon-action-btn" (click)="shareMeme(m, $event)" title="Share meme">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
               </div>
             </div>
-          }
+            <div class="reddit-card__info">
+              <h4 class="reddit-card__title">{{ m.title }}</h4>
+              <div class="reddit-card__meta">
+                <span class="reddit-card__sub">r/{{ m.subreddit }}</span>
+                <span class="reddit-card__score">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  {{ m.ups | number }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (!filteredFavorites().length) {
+        <div class="empty-state">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <p>No bookmarked memes yet</p>
+          <span>Find memes in the Explore tab and bookmark them to save here.</span>
         </div>
       }
+    </div>
+  }
+
+  <!-- ══ PREVIEW DIALOG ══════════════════════════════════════ -->
+  @if (activePreviewMeme()) {
+    <div class="dialog-overlay" (click)="closePreview()">
+      <div class="dialog-card glass-card-elevated" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <div class="dialog-title-group">
+            <h3 class="dialog-title">{{ activePreviewMeme()!.title }}</h3>
+            <span class="dialog-sub">r/{{ activePreviewMeme()!.subreddit }} · Posted by u/{{ activePreviewMeme()!.author }}</span>
+          </div>
+          <button class="dialog-close" (click)="closePreview()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="dialog-body" [class.transparent-pattern]="activePreviewMeme()!.subreddit === 'stickers'">
+          <img [src]="activePreviewMeme()!.url" [alt]="activePreviewMeme()!.title" class="dialog-img" />
+        </div>
+        <div class="dialog-footer">
+          <div class="dialog-stats">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--brand-accent)"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            <span>{{ activePreviewMeme()!.ups | number }} upvotes</span>
+          </div>
+          <div class="dialog-actions">
+            <button class="out-btn" (click)="toggleBookmark(activePreviewMeme()!)" [title]="isBookmarked(activePreviewMeme()!) ? 'Remove from bookmarks' : 'Add to bookmarks'">
+              <svg width="14" height="14" viewBox="0 0 24 24" [attr.fill]="isBookmarked(activePreviewMeme()!) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+              {{ isBookmarked(activePreviewMeme()!) ? 'Saved' : 'Bookmark' }}
+            </button>
+            <button class="out-btn" (click)="copyImageUrl(activePreviewMeme()!.url)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Link
+            </button>
+            <button class="out-btn" (click)="shareMeme(activePreviewMeme()!)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+            <button class="primary-btn" (click)="downloadMemeFile(activePreviewMeme()!)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   }
 

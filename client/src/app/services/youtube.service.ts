@@ -20,7 +20,7 @@ export interface YouTubeSearchResponse {
 export class YouTubeService {
   private http = inject(HttpClient);
   // Using the absolute URL since we need to hit the Express backend API
-  private baseUrl = 'http://localhost:5000/api/music/youtube/search';
+  private baseUrl = 'http://localhost:8080/api/music/youtube/search';
 
   searchTracks(query: string, pageToken: string = ''): Observable<YouTubeSearchResponse> {
     let url = `${this.baseUrl}?q=${encodeURIComponent(query)}`;
