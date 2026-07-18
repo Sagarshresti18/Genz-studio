@@ -23,7 +23,7 @@ export class YouTubeService {
   private baseUrl = 'https://genz-studio-api.onrender.com/api';
 
   searchTracks(query: string, pageToken: string = ''): Observable<YouTubeSearchResponse> {
-    let url = `${this.baseUrl}?q=${encodeURIComponent(query)}`;
+    let url = `${this.baseUrl}/music/youtube/search?q=${encodeURIComponent(query)}`;
     if (pageToken) {
       url += `&pageToken=${pageToken}`;
     }

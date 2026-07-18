@@ -57,7 +57,10 @@ export class WorkspaceLayoutComponent {
   protected readonly showWorkspaceMenu = signal(false);
   protected readonly showNotifications = signal(false);
 
-  protected readonly isDarkMode = signal<boolean>(false);
+  protected readonly isDarkMode = signal<boolean>(
+    (typeof localStorage !== 'undefined' && localStorage.getItem('theme') === 'dark') ||
+    (typeof localStorage !== 'undefined' && !localStorage.getItem('theme') && typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  );
 
   protected readonly accentThemes = signal<AccentTheme[]>([
     { id: 'violet', name: 'Violet', class: 'theme-violet', primaryColor: '#7C3AED' },
@@ -226,9 +229,10 @@ export class WorkspaceLayoutComponent {
   }
 
   protected toggleTheme(): void {
-    this.isDarkMode.set(false);
-    localStorage.setItem('theme', 'light');
-    this.applyTheme(false);
+    const newVal = !this.isDarkMode();
+    this.isDarkMode.set(newVal);
+    localStorage.setItem('theme', newVal ? 'dark' : 'light');
+    this.applyTheme(newVal);
   }
 
   private applyTheme(dark: boolean): void {

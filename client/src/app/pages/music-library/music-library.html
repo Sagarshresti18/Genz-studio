@@ -6,12 +6,20 @@
     <div class="music-search">
       <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="searchTracks()" class="music-search__input" placeholder="Search tracks...">
       <button class="music-search__btn" (click)="searchTracks()">Search</button>
+      <div class="view-toggle">
+        <button class="view-toggle__btn" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="Grid View">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg>
+        </button>
+        <button class="view-toggle__btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'" title="List View">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
   
   <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
   
-  <div class="music-grid">
+  <div [ngClass]="viewMode === 'grid' ? 'music-grid' : 'music-list'">
     <div class="music-card" *ngFor="let track of tracks" [class.is-playing]="currentlyPlayingId === track.id">
       <div class="music-card__image-wrapper" (click)="togglePlay(track)">
         <img [src]="track.thumbnail" [alt]="track.title" class="music-card__image">
@@ -28,6 +36,12 @@
           <button class="music-card__action music-card__action--download" *ngIf="track.type === 'jamendo'" (click)="downloadTrack(track, $event)" title="Download">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>
+          </button>
+          
+          <button class="music-card__action music-card__action--copy" *ngIf="track.type === 'youtube'" (click)="copyLink(track, $event)" title="Copy Link">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
             </svg>
           </button>
         </div>
@@ -71,6 +85,11 @@
         </button>
         <button class="music-player__btn" (click)="nextTrack()">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <button class="music-player__btn" style="margin-left: 12px; transform: scale(0.9);" *ngIf="currentTrack.type === 'youtube'" (click)="copyLink(currentTrack, $event)" title="Copy Link">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+          </svg>
         </button>
       </div>
       <div class="music-player__progress">

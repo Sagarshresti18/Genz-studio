@@ -159,10 +159,11 @@
   }
 }
 
-.music-card__action--download {
+.music-card__action--download,
+.music-card__action--copy {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  bottom: 16px;
+  right: 62px;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -186,6 +187,85 @@
     background: var(--brand-secondary);
     color: #fff;
     border-color: transparent;
+  }
+}
+
+// ── View Toggle ──────────────────────────────────────────────
+.view-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  gap: 2px;
+  margin-left: var(--space-4);
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    &.active {
+      background: var(--brand-primary);
+      color: #fff;
+    }
+  }
+}
+
+// ── Music List (Alternative View) ────────────────────────────
+.music-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-6);
+
+  .music-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    gap: var(--space-4);
+
+    .music-card__image-wrapper {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .music-card__info {
+      flex: 1;
+    }
+    
+    .music-card__action--play {
+      width: 32px;
+      height: 32px;
+      bottom: 50%;
+      right: 50%;
+      transform: translate(50%, 50%) scale(0.9);
+      
+      &:hover {
+        transform: translate(50%, 50%) scale(1.1) !important;
+      }
+    }
+    
+    .music-card__action--download,
+    .music-card__action--copy {
+      display: none;
+    }
   }
 }
 
@@ -573,5 +653,46 @@
     &__center {
       max-width: none;
     }
+  }
+}
+
+// ── Dark Mode Overrides ───────────────────────────────────────
+:host-context(.dark) {
+  .music-search__input {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-default);
+    
+    &:focus {
+      background: var(--bg-surface);
+    }
+  }
+
+  .music-card {
+    background: var(--bg-surface);
+    border-color: var(--border-default);
+
+    &.is-playing {
+      background: rgba(124, 58, 237, 0.05);
+      border-color: rgba(124, 58, 237, 0.4);
+    }
+  }
+
+  .music-card__action--download,
+  .music-card__action--copy {
+    background: rgba(30, 30, 30, 0.8);
+    color: var(--text-primary);
+    border-color: var(--border-default);
+
+    &:hover {
+      background: var(--brand-primary);
+      color: #fff;
+      border-color: transparent;
+    }
+  }
+
+  .music-player {
+    background: rgba(30, 30, 30, 0.85);
+    border-top-color: var(--border-default);
   }
 }
