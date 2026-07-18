@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 
-const BASE = 'http://localhost:5000/api';
+const BASE = 'https://genz-studio-api.onrender.com/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
