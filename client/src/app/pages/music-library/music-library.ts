@@ -41,6 +41,9 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
   currentlyPlayingId: string | null = null;
   currentTrack: UnifiedTrack | null = null;
   
+  showToast = false;
+  toastMessage = '';
+  
   // Dual Playback Engines
   private ytPlayer: any = null;
   isYtPlayerReady = false;
@@ -79,8 +82,8 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
   
   initYtPlayer() {
     this.ytPlayer = new YT.Player('youtube-player', {
-      height: '100',
-      width: '100',
+      height: '135',
+      width: '240',
       playerVars: {
         'playsinline': 1,
         'controls': 0,
@@ -358,21 +361,30 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  copyLink(track: UnifiedTrack, event: Event) {
+  openInYouTube(track: UnifiedTrack, event: Event) {
     event.stopPropagation();
-    let url = '';
     if (track.type === 'youtube') {
-      url = `https://www.youtube.com/watch?v=${track.id}`;
-    } else if (track.type === 'jamendo' && track.audioUrl) {
-      url = track.audioUrl;
+      const url = `https://www.youtube.com/watch?v=${track.id}`;
+      const newWin = window.open(url, '_blank', 'noopener,noreferrer');
+      if (newWin) newWin.opener = null;
     }
-    
-    if (url) {
+  }
+
+  copyYouTubeLink(track: UnifiedTrack, event: Event) {
+    event.stopPropagation();
+    if (track.type === 'youtube') {
+      const url = `https://www.youtube.com/watch?v=${track.id}`;
       navigator.clipboard.writeText(url).then(() => {
-        // Simple visual feedback could be added here
-      }).catch(err => {
-        console.error('Failed to copy link', err);
-      });
+        this.showToastMessage('YouTube link copied!');
+      }).catch(err => console.error('Failed to copy', err));
     }
+  }
+
+  showToastMessage(msg: string) {
+    this.toastMessage = msg;
+    this.showToast = true;
+    setTimeout(() => {
+      this.showToast = false;
+    }, 3000);
   }
 }
