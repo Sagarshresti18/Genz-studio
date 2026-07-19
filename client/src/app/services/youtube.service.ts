@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -19,8 +19,8 @@ export interface YouTubeSearchResponse {
 })
 export class YouTubeService {
   private http = inject(HttpClient);
-  // Using the absolute URL since we need to hit the Express backend API
-  private baseUrl = 'https://genz-studio-api.onrender.com/api';
+  // Using relative path for production, localhost for development
+  private baseUrl = isDevMode() ? 'http://localhost:5000/api' : '/api';
 
   searchTracks(query: string, pageToken: string = ''): Observable<YouTubeSearchResponse> {
     let url = `${this.baseUrl}/music/youtube/search?q=${encodeURIComponent(query)}`;
