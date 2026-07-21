@@ -44,7 +44,7 @@ const lerp = (start: number, end: number, t: number) => start * (1 - t) + end * 
   standalone: true,
   imports: [CommonModule],
   templateUrl: './scroll-morph-hero.html',
-  styleUrls: []
+  styleUrl: './scroll-morph-hero.scss'
 })
 export class ScrollMorphHero implements OnInit, OnDestroy {
   @ViewChild('containerRef') containerRef!: ElementRef<HTMLDivElement>;

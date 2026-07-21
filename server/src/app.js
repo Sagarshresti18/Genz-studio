@@ -32,8 +32,10 @@ const {
 
 const app = express();
 
-// Security
-app.use(helmet());
+// Security: allow cross-origin image requests
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // CORS
 const allowedOrigins = [
@@ -60,7 +62,6 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());

@@ -1,57 +1,55 @@
-<div #containerRef class="relative w-full h-full bg-[#FAFAFA] overflow-hidden min-h-screen"
-    (wheel)="onWheel($event)"
-    (touchstart)="onTouchStart($event)"
-    (touchmove)="onTouchMove($event)"
-    (mousemove)="onMouseMove($event)">
+<div #containerRef class="morph-hero-container"
+     (wheel)="onWheel($event)"
+     (touchstart)="onTouchStart($event)"
+     (touchmove)="onTouchMove($event)"
+     (mousemove)="onMouseMove($event)">
     
-    <div class="flex h-full w-full flex-col items-center justify-center" style="perspective: 1000px; height: 100vh;">
+    <div class="stage-wrapper">
         
         <!-- Intro Text -->
-        <div class="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2 transition-all duration-300"
+        <div class="intro-text-block"
              [style.opacity]="introOpacity"
              [style.filter]="introFilter">
-            <h1 class="text-2xl font-medium tracking-tight text-gray-800 md:text-4xl">
+            <h1 class="intro-title">
                 The future is built on AI.
             </h1>
-            <p class="mt-4 text-xs font-bold tracking-[0.2em] text-gray-500" [style.opacity]="introSubtitleOpacity">
+            <p class="intro-subtitle" [style.opacity]="introSubtitleOpacity">
                 SCROLL TO EXPLORE
             </p>
         </div>
 
         <!-- Arc Active Content -->
-        <div class="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4 transition-all duration-300"
+        <div class="active-content-block"
              [style.opacity]="contentOpacity"
              [style.transform]="'translateY(' + contentY + 'px)'">
-            <h2 class="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4">
+            <h2 class="content-title">
                 Explore Our Vision
             </h2>
-            <p class="text-sm md:text-base text-gray-600 max-w-lg leading-relaxed">
-                Discover a world where technology meets creativity. <br class="hidden md:block" />
+            <p class="content-desc">
+                Discover a world where technology meets creativity. <br class="md-only-br" />
                 Scroll through our curated collection of innovations designed to shape the future.
             </p>
         </div>
 
         <!-- Main Container -->
-        <div class="relative flex items-center justify-center w-full h-full">
+        <div class="cards-wrapper">
             <div *ngFor="let src of images; let i = index"
-                 class="cursor-pointer group absolute"
-                 style="width: 60px; height: 85px; transform-style: preserve-3d; perspective: 1000px;"
+                 class="image-card-item"
                  [style.transform]="'translate3d(' + currentTransforms[i].x + 'px, ' + currentTransforms[i].y + 'px, 0) rotate(' + currentTransforms[i].rotation + 'deg) scale(' + currentTransforms[i].scale + ')'"
                  [style.opacity]="currentTransforms[i].opacity">
                  
-                <div class="relative h-full w-full transition-transform duration-500 hover:rotate-y-180" style="transform-style: preserve-3d;">
+                <div class="card-flipper">
                     <!-- Front Face -->
-                    <div class="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg bg-gray-200" style="backface-visibility: hidden;">
-                        <img [src]="src" alt="hero-{{i}}" class="h-full w-full object-cover" />
-                        <div class="absolute inset-0 bg-black/10 transition-colors group-hover:bg-transparent"></div>
+                    <div class="card-face-front">
+                        <img [src]="src" alt="hero-{{i}}" class="card-img" />
+                        <div class="image-overlay"></div>
                     </div>
 
                     <!-- Back Face -->
-                    <div class="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg bg-gray-900 flex flex-col items-center justify-center p-4 border border-gray-700"
-                         style="backface-visibility: hidden; transform: rotateY(180deg);">
-                        <div class="text-center">
-                            <p class="text-[8px] font-bold text-blue-400 uppercase tracking-widest mb-1">View</p>
-                            <p class="text-xs font-medium text-white">Details</p>
+                    <div class="card-face-back">
+                        <div class="back-text-wrap">
+                            <p class="back-tag">View</p>
+                            <p class="back-title">Details</p>
                         </div>
                     </div>
                 </div>
@@ -59,9 +57,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .hover\:rotate-y-180:hover {
-        transform: rotateY(180deg);
-    }
-</style>

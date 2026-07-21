@@ -29,7 +29,7 @@ export interface Model {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './claude-chat-input.html',
-  styleUrls: []
+  styleUrl: './claude-chat-input.scss'
 })
 export class ClaudeChatInput {
   @Output() sendMessage = new EventEmitter<{

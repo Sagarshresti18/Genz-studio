@@ -362,4 +362,94 @@ function getDemoCaptions(tone) {
   return map[tone] || map.funny;
 }
 
-module.exports = { listTemplates, listMyMemes, remixMeme, generateAiCaption, generateAiBackground, removeMeme, proxyImage, generateTemplateImage };
+async function searchGiphyProxy(req, res, next) {
+  try {
+    const { q, limit = 20, offset = 0, type = 'gifs' } = req.query;
+    const apiKey = env.GIPHY_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, message: 'Giphy API key is not configured' });
+    }
+
+    const endpoint = type === 'stickers' 
+      ? 'https://api.giphy.com/v1/stickers/search' 
+      : 'https://api.giphy.com/v1/gifs/search';
+
+    const params = new URLSearchParams({
+      api_key: apiKey,
+      q: q || '',
+      limit: String(limit),
+      offset: String(offset),
+      rating: 'g'
+    });
+
+    const response = await fetch(`${endpoint}?${params.toString()}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      return res.status(response.status).json({ success: false, message: `Giphy API error: ${errText}` });
+    }
+
+    const data = await response.json();
+    const memes = (data.data || []).map(item => ({
+      title: item.title || (type === 'stickers' ? 'Sticker' : 'GIF'),
+      url: item.images?.fixed_height?.url || item.images?.original?.url || '',
+      postLink: item.url,
+      subreddit: type === 'stickers' ? 'stickers' : 'gifs',
+      ups: 100,
+      author: item.username || 'Giphy'
+    }));
+
+    res.json({ success: true, memes });
+  } catch (err) { next(err); }
+}
+
+async function trendingGiphyProxy(req, res, next) {
+  try {
+    const { limit = 20, offset = 0, type = 'gifs' } = req.query;
+    const apiKey = env.GIPHY_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, message: 'Giphy API key is not configured' });
+    }
+
+    const endpoint = type === 'stickers' 
+      ? 'https://api.giphy.com/v1/stickers/trending' 
+      : 'https://api.giphy.com/v1/gifs/trending';
+
+    const params = new URLSearchParams({
+      api_key: apiKey,
+      limit: String(limit),
+      offset: String(offset),
+      rating: 'g'
+    });
+
+    const response = await fetch(`${endpoint}?${params.toString()}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      return res.status(response.status).json({ success: false, message: `Giphy API error: ${errText}` });
+    }
+
+    const data = await response.json();
+    const memes = (data.data || []).map(item => ({
+      title: item.title || (type === 'stickers' ? 'Sticker' : 'GIF'),
+      url: item.images?.fixed_height?.url || item.images?.original?.url || '',
+      postLink: item.url,
+      subreddit: type === 'stickers' ? 'stickers' : 'gifs',
+      ups: 100,
+      author: item.username || 'Giphy'
+    }));
+
+    res.json({ success: true, memes });
+  } catch (err) { next(err); }
+}
+
+module.exports = { 
+  listTemplates, 
+  listMyMemes, 
+  remixMeme, 
+  generateAiCaption, 
+  generateAiBackground, 
+  removeMeme, 
+  proxyImage, 
+  generateTemplateImage,
+  searchGiphyProxy,
+  trendingGiphyProxy
+};

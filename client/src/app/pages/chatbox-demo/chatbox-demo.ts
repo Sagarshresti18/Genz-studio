@@ -7,7 +7,7 @@ import { ClaudeChatInput } from '../../shared/components/ui/claude-chat-input/cl
   standalone: true,
   imports: [CommonModule, ClaudeChatInput],
   templateUrl: './chatbox-demo.html',
-  styleUrls: []
+  styleUrl: './chatbox-demo.scss'
 })
 export class ChatboxDemo {
   messages: string[] = [];
