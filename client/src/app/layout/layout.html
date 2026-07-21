@@ -7,22 +7,55 @@
   <aside class="sidebar" [class.mobile-open]="mobileMenuOpen()">
 
     <div class="sidebar-header">
-      <a routerLink="/workspace/dashboard" class="logo-link" (click)="closeMobileMenu()">
-        <div class="logo-mark">
-          <svg width="32" height="32" viewBox="0 0 30 30" fill="none">
-            <rect width="30" height="30" rx="9" fill="url(#lgrad)"/>
-            <path d="M8 15l5-7.5 5 7.5-5 7.5-5-7.5z" fill="white" opacity="0.95"/>
-            <path d="M15 10l5-2.5v15L15 20V10z" fill="white" opacity="0.5"/>
-            <defs>
-              <linearGradient id="lgrad" x1="0" y1="0" x2="30" y2="30">
-                <stop stop-color="#7C3AED"/>
-                <stop offset="1" stop-color="#06B6D4"/>
-              </linearGradient>
-            </defs>
+      <div class="workspace-selector-container" [class.menu-open]="showWorkspaceMenu() && workspaces().length > 1">
+        <button class="workspace-btn" (click)="workspaces().length > 1 && toggleWorkspaceMenu()" [style.cursor]="workspaces().length > 1 ? 'pointer' : 'default'">
+          <div class="workspace-avatar" [style.background]="activeWorkspace().logoColor">
+            {{ activeWorkspace().logoLetter }}
+          </div>
+          @if (!sidebarCollapsed()) {
+            <div class="workspace-details">
+              <span class="workspace-name">{{ activeWorkspace().name }}</span>
+              <span class="workspace-role">{{ activeWorkspace().role }}</span>
+            </div>
+            @if (workspaces().length > 1) {
+              <svg class="workspace-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            }
+          @}
+        </button>
+
+        @if (showWorkspaceMenu()) {
+          <div class="workspace-dropdown">
+            <div class="workspace-dropdown-header">Workspaces</div>
+            <div class="workspace-list">
+              @for (w of workspaces(); track w.id) {
+                <button class="workspace-item" [class.active]="w.id === activeWorkspaceId()" (click)="selectWorkspace(w.id)">
+                  <div class="workspace-avatar" [style.background]="w.logoColor">
+                    {{ w.logoLetter }}
+                  </div>
+                  <div class="workspace-item-info">
+                    <span class="workspace-item-name">{{ w.name }}</span>
+                    <span class="workspace-item-role">{{ w.role }}</span>
+                  </div>
+                  @if (w.id === activeWorkspaceId()) {
+                    <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      @if (!sidebarCollapsed()) {
+        <button class="collapse-btn" (click)="toggleSidebar()" title="Collapse Sidebar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
           </svg>
-        </div>
-        <span class="logo-text">GenZ Studio</span>
-      </a>
+        </button>
+      }
     </div>
 
     @if (!sidebarCollapsed()) {
@@ -71,14 +104,20 @@
     </nav>
 
     <div class="sidebar-footer">
-      <a routerLink="/workspace/dashboard" class="nav-item" [title]="sidebarCollapsed() ? 'Settings' : ''" (click)="closeMobileMenu()">
-        <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-          <path [attr.d]="getIcon('settings')"/>
-        </svg>
-        @if (!sidebarCollapsed()) { <span class="nav-label">Settings</span> }
-      </a>
+      @if (sidebarCollapsed()) {
+        <button class="nav-item expand-toggle-btn" (click)="toggleSidebar()" title="Expand Sidebar">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      } @else {
+        <a routerLink="/workspace/dashboard" class="nav-item" [title]="sidebarCollapsed() ? 'Settings' : ''" (click)="closeMobileMenu()">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path [attr.d]="getIcon('settings')"/>
+          </svg>
+          <span class="nav-label">Settings</span>
+        </a>
 
-      @if (!sidebarCollapsed()) {
         <div class="user-section" [class.menu-open]="showUserMenu()">
           <div class="user-card" (click)="toggleUserMenu()">
             <div class="user-avatar">{{ userInitials() }}</div>
@@ -116,10 +155,6 @@
             </div>
           }
         </div>
-      } @else {
-        <div class="collapsed-avatar" title="User Profile">
-          <div class="user-avatar" (click)="toggleUserMenu()">{{ userInitials() }}</div>
-        </div>
       }
     </div>
   </aside>
@@ -142,19 +177,108 @@
         </div>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn" aria-label="Notifications">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span class="notif-dot"></span>
+        <!-- Theme Toggle Button -->
+        <button class="icon-btn theme-toggle-btn" (click)="toggleTheme()" [title]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+          @if (isDarkMode()) {
+            <!-- Sun Icon -->
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          } @else {
+            <!-- Moon Icon -->
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          }
         </button>
+
+        <!-- Theme Color Palette Selector Dropdown -->
+        <div class="theme-selector-container" [class.menu-open]="showThemeMenu()">
+          <button class="icon-btn theme-palette-btn" (click)="toggleThemeMenu()" title="Change Theme Accent Color">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C4.85857 19 4.5 20 3.5 20C2.5 20 2.5 21 3 21.5C3.5 22 5.5 22 6.5 22C7.5 22 8 21.5 8 21C8 20 9 19.5 10 19.5C11 19.5 11.5 20 12 20.5C12.5 21 12 22 12 22Z"/>
+              <circle cx="7.5" cy="10.5" r="1.5" fill="currentColor"/>
+              <circle cx="11.5" cy="7.5" r="1.5" fill="currentColor"/>
+              <circle cx="16.5" cy="9.5" r="1.5" fill="currentColor"/>
+              <circle cx="15.5" cy="14.5" r="1.5" fill="currentColor"/>
+            </svg>
+          </button>
+
+          @if (showThemeMenu()) {
+            <div class="theme-dropdown">
+              <div class="theme-dropdown-header">Accent Colors</div>
+              <div class="theme-colors-grid">
+                @for (t of accentThemes(); track t.id) {
+                  <button class="color-dot-btn"
+                          [class.active]="t.id === activeThemeColor()"
+                          (click)="selectAccentTheme(t.id)"
+                          [style.background]="t.primaryColor"
+                          [title]="t.name">
+                    @if (t.id === activeThemeColor()) {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Notifications Container -->
+        <div class="notifications-btn-container" [class.menu-open]="showNotifications()">
+          <button class="icon-btn" (click)="toggleNotifications()" aria-label="Notifications" title="Notifications">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            @if (unreadNotificationsCount() > 0) {
+              <span class="notif-dot"></span>
+            }
+          </button>
+
+          @if (showNotifications()) {
+            <div class="notifications-dropdown">
+              <div class="notifications-header">
+                <span class="title">Notifications</span>
+                <div class="actions">
+                  <button class="txt-btn" (click)="markAllNotificationsAsRead()">Mark all read</button>
+                  <span class="dot-sep">·</span>
+                  <button class="txt-btn txt-btn--danger" (click)="clearNotifications()">Clear</button>
+                </div>
+              </div>
+              <div class="notifications-list">
+                @if (notifications().length === 0) {
+                  <div class="no-notifications">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span>All caught up!</span>
+                  </div>
+                } @else {
+                  @for (n of notifications(); track n.id) {
+                    <div class="notification-item" [class.unread]="!n.read">
+                      <div class="status-indicator" [class]="'status-indicator--' + n.type"></div>
+                      <div class="notification-body">
+                        <span class="notification-title">{{ n.title }}</span>
+                        <span class="notification-desc">{{ n.desc }}</span>
+                        <span class="notification-time">{{ n.time }}</span>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+
         <div class="credits-chip">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/>
           </svg>
           <span>2,400</span>
         </div>
-        <div class="topbar-avatar">{{ userInitials() }}</div>
+        <div class="topbar-avatar" (click)="toggleUserMenu()">{{ userInitials() }}</div>
       </div>
     </header>
 

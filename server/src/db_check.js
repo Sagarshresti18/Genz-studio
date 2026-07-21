@@ -1,18 +1,25 @@
-const { getDatabasePool } = require('./config/database');
+const { getDatabasePool } = require("./config/database");
 
 async function check() {
   try {
     const pool = getDatabasePool();
-    const res = await pool.query(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'video_projects'
+
+    const result = await pool.query(`
+      SELECT
+        current_database() AS database_name,
+        current_user AS username,
+        version();
     `);
-    console.log('Columns in video_projects:', res.rows);
+
+    console.log("✅ Successfully connected to Neon!");
+    console.table(result.rows);
+
   } catch (err) {
-    console.error('Error checking database:', err);
+    console.error("❌ Connection Failed");
+    console.error(err);
+  } finally {
+    process.exit(0);
   }
-  process.exit(0);
 }
 
 check();

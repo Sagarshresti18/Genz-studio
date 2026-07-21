@@ -12,7 +12,7 @@ const PLATFORMS = [
   { key: 'youtube',   label: 'YouTube',   color: '#EF4444' },
   { key: 'instagram', label: 'Instagram', color: '#EC4899' },
   { key: 'tiktok',    label: 'TikTok',    color: '#0f172a' },
-  { key: 'twitter',   label: 'Twitter/X', color: '#1DA1F2' },
+  { key: 'twitter',   label: 'Twitter/X', color: '#090a0f' },
   { key: 'linkedin',  label: 'LinkedIn',  color: '#0A66C2' },
 ];
 
@@ -27,11 +27,12 @@ const CONTENT_TYPES = ['Video', 'Short', 'Reel', 'Post', 'Story', 'Thread', 'New
 })
 export class ContentCalendarPage {
   readonly today = new Date();
-  readonly currentWeekStart = signal(this.getWeekStart(this.today));
+  readonly currentDate = signal<Date>(new Date());
   readonly showModal = signal(false);
   readonly editPost = signal<Post | null>(null);
   readonly filterPlatform = signal('all');
-  readonly viewMode = signal<'week' | 'month'>('week');
+  readonly searchQuery = signal('');
+  readonly viewMode = signal<'week' | 'month'>('month');
 
   readonly form = signal({ title: '', platform: 'youtube', type: 'Video', date: '', time: '10:00', status: 'scheduled' as Post['status'] });
 
@@ -39,7 +40,7 @@ export class ContentCalendarPage {
     { id: '1', title: 'How I grew 10k subs in 30 days', platform: 'youtube', type: 'Video', date: this.dateStr(0), time: '10:00', status: 'scheduled', color: '#EF4444' },
     { id: '2', title: 'Morning routine vlog', platform: 'instagram', type: 'Reel', date: this.dateStr(1), time: '08:00', status: 'draft', color: '#EC4899' },
     { id: '3', title: 'AI tools tier list 2025', platform: 'tiktok', type: 'Short', date: this.dateStr(2), time: '18:00', status: 'scheduled', color: '#0f172a' },
-    { id: '4', title: 'Creator economy thread', platform: 'twitter', type: 'Thread', date: this.dateStr(3), time: '12:00', status: 'published', color: '#1DA1F2' },
+    { id: '4', title: 'Creator economy thread', platform: 'twitter', type: 'Thread', date: this.dateStr(3), time: '12:00', status: 'published', color: '#090a0f' },
     { id: '5', title: 'Behind the scenes', platform: 'instagram', type: 'Story', date: this.dateStr(4), time: '15:00', status: 'scheduled', color: '#EC4899' },
     { id: '6', title: 'Weekly newsletter', platform: 'linkedin', type: 'Newsletter', date: this.dateStr(5), time: '09:00', status: 'draft', color: '#0A66C2' },
   ]);
@@ -48,7 +49,7 @@ export class ContentCalendarPage {
   readonly contentTypes = CONTENT_TYPES;
 
   readonly weekDays = computed(() => {
-    const start = this.currentWeekStart();
+    const start = this.getWeekStart(this.currentDate());
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
@@ -56,9 +57,37 @@ export class ContentCalendarPage {
     });
   });
 
+  readonly currentMonthStart = computed(() => {
+    const d = new Date(this.currentDate());
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+
+  readonly monthDays = computed(() => {
+    const startOfMonth = this.currentMonthStart();
+    const startOfWeek = new Date(startOfMonth);
+    const startDayOfWeek = startOfMonth.getDay();
+    // Shift back to the Sunday of the week containing the 1st
+    startOfWeek.setDate(startOfWeek.getDate() - startDayOfWeek);
+
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(startOfWeek);
+      d.setDate(d.getDate() + i);
+      return {
+        date: d,
+        isCurrentMonth: d.getMonth() === startOfMonth.getMonth(),
+        isToday: this.isToday(d),
+      };
+    });
+  });
+
   readonly filteredPosts = computed(() => {
     const f = this.filterPlatform();
-    return this.posts().filter(p => f === 'all' || p.platform === f);
+    const q = this.searchQuery().toLowerCase().trim();
+    return this.posts().filter(p => {
+      const matchesPlatform = f === 'all' || p.platform === f;
+      const matchesSearch = !q || p.title.toLowerCase().includes(q) || p.type.toLowerCase().includes(q);
+      return matchesPlatform && matchesSearch;
+    });
   });
 
   readonly stats = computed(() => {
@@ -78,16 +107,28 @@ export class ContentCalendarPage {
 
   isToday(d: Date) { return this.fmtDate(d) === this.fmtDate(this.today); }
 
-  prevWeek() {
-    const d = new Date(this.currentWeekStart());
-    d.setDate(d.getDate() - 7);
-    this.currentWeekStart.set(d);
+  prevPeriod() {
+    if (this.viewMode() === 'week') {
+      const d = new Date(this.currentDate());
+      d.setDate(d.getDate() - 7);
+      this.currentDate.set(d);
+    } else {
+      const d = new Date(this.currentDate());
+      d.setMonth(d.getMonth() - 1);
+      this.currentDate.set(d);
+    }
   }
 
-  nextWeek() {
-    const d = new Date(this.currentWeekStart());
-    d.setDate(d.getDate() + 7);
-    this.currentWeekStart.set(d);
+  nextPeriod() {
+    if (this.viewMode() === 'week') {
+      const d = new Date(this.currentDate());
+      d.setDate(d.getDate() + 7);
+      this.currentDate.set(d);
+    } else {
+      const d = new Date(this.currentDate());
+      d.setMonth(d.getMonth() + 1);
+      this.currentDate.set(d);
+    }
   }
 
   openAdd(date?: Date) {
@@ -155,11 +196,16 @@ export class ContentCalendarPage {
   dayLabel(d: Date) { return d.toLocaleDateString('en-US', { weekday: 'short' }); }
   dayNum(d: Date) { return d.getDate(); }
   monthLabel(d: Date) { return d.toLocaleDateString('en-US', { month: 'short' }); }
-  weekRange() {
-    const days = this.weekDays();
-    const s = days[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const e = days[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    return `${s} – ${e}`;
+  
+  periodLabel() {
+    if (this.viewMode() === 'week') {
+      const days = this.weekDays();
+      const s = days[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const e = days[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `${s} – ${e}`;
+    } else {
+      return this.currentDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
   }
 
   private fmtDate(d: Date) { return d.toISOString().split('T')[0]; }

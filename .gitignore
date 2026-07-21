@@ -147,3 +147,4 @@ dist
 .env
 logs
 coverage
+.env.local

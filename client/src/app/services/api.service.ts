@@ -3,7 +3,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 
-const BASE = 'http://localhost:8080/api';
+const BASE = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+  ? 'http://localhost:8080/api'
+  : 'https://genz-studio-api.onrender.com/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {

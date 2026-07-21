@@ -1,0 +1,146 @@
+<div class="chat-input-wrapper"
+     (dragover)="onDragOver($event)"
+     (dragleave)="onDragLeave($event)"
+     (drop)="onDrop($event)">
+
+    <div class="chat-input-box">
+        <div class="chat-input-content">
+            <!-- Uploaded Files & Pasted Content Preview -->
+            <div *ngIf="files.length > 0 || pastedContent.length > 0" class="preview-row">
+                <!-- Pasted Content -->
+                <div *ngFor="let content of pastedContent" class="pasted-preview">
+                    <div class="pasted-content-scroll">
+                        <p class="pasted-content-text">{{ content.content }}</p>
+                    </div>
+                    <div class="pasted-badge-wrap">
+                        <div class="pasted-badge">
+                            <span class="pasted-badge-text">PASTED</span>
+                        </div>
+                    </div>
+                    <button (click)="removePastedContent(content.id)" class="remove-preview-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <!-- File Preview -->
+                <div *ngFor="let file of files" class="file-preview">
+                    <ng-container *ngIf="file.preview; else noPreview">
+                        <div class="file-preview-image-wrap">
+                            <img [src]="file.preview" [alt]="file.file.name" class="file-preview-image" />
+                            <div class="file-preview-overlay"></div>
+                        </div>
+                    </ng-container>
+                    <ng-template #noPreview>
+                        <div class="no-preview-wrap">
+                            <div class="file-ext-row">
+                                <div class="file-ext-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                </div>
+                                <span class="file-ext-text">
+                                    {{ file.file.name.split('.').pop() }}
+                                </span>
+                            </div>
+                            <div class="file-meta-wrap">
+                                <p class="file-name-text" [title]="file.file.name">{{ file.file.name }}</p>
+                                <p class="file-size-text">{{ formatFileSize(file.file.size) }}</p>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <button (click)="removeFile(file.id)" class="remove-file-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+
+                    <div *ngIf="file.uploadStatus === 'uploading'" class="upload-spinner-wrap">
+                        <svg class="upload-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Textarea -->
+            <div class="textarea-row">
+                <div class="textarea-container">
+                    <textarea #textareaRef
+                              [(ngModel)]="message"
+                              (ngModelChange)="onMessageChange()"
+                              (paste)="handlePaste($event)"
+                              (keydown)="handleKeyDown($event)"
+                              placeholder="How can I help you today?"
+                              class="textarea-input"
+                              rows="1"
+                              style="min-height: 1.5em;"></textarea>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar-row">
+                <div class="toolbar-left">
+                    <button (click)="triggerFileInput()" class="add-file-btn" type="button" aria-label="Add file">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+
+                    <div class="thinking-btn-wrap">
+                        <button (click)="isThinkingEnabled = !isThinkingEnabled" 
+                                [class.active]="isThinkingEnabled"
+                                class="thinking-btn" type="button" aria-label="Extended thinking">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10.3857 2.50977C14.3486 2.71054 17.5 5.98724 17.5 10C17.5 14.1421 14.1421 17.5 10 17.5C5.85786 17.5 2.5 14.1421 2.5 10C2.5 9.72386 2.72386 9.5 3 9.5C3.27614 9.5 3.5 9.72386 3.5 10C3.5 13.5899 6.41015 16.5 10 16.5C13.5899 16.5 16.5 13.5899 16.5 10C16.5 6.5225 13.7691 3.68312 10.335 3.50879L10 3.5L9.89941 3.49023C9.67145 3.44371 9.5 3.24171 9.5 3C9.5 2.72386 9.72386 2.5 10 2.5L10.3857 2.50977ZM10 5.5C10.2761 5.5 10.5 5.72386 10.5 6V9.69043L13.2236 11.0527C13.4706 11.1762 13.5708 11.4766 13.4473 11.7236C13.3392 11.9397 13.0957 12.0435 12.8711 11.9834L12.7764 11.9473L9.77637 10.4473C9.60698 10.3626 9.5 10.1894 9.5 10V6C9.5 5.72386 9.72386 5.5 10 5.5ZM3.66211 6.94141C4.0273 6.94159 4.32303 7.23735 4.32324 7.60254C4.32324 7.96791 4.02743 8.26446 3.66211 8.26465C3.29663 8.26465 3 7.96802 3 7.60254C3.00021 7.23723 3.29676 6.94141 3.66211 6.94141ZM4.95605 4.29395C5.32146 4.29404 5.61719 4.59063 5.61719 4.95605C5.6171 5.3214 5.3214 5.61709 4.95605 5.61719C4.59063 5.61719 4.29403 5.32146 4.29395 4.95605C4.29395 4.59057 4.59057 4.29395 4.95605 4.29395ZM7.60254 3C7.96802 3 8.26465 3.29663 8.26465 3.66211C8.26446 4.02743 7.96791 4.32324 7.60254 4.32324C7.23736 4.32302 6.94159 4.0273 6.94141 3.66211C6.94141 3.29676 7.23724 3.00022 7.60254 3ZM22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="toolbar-right">
+                    <!-- Model Selector -->
+                    <div class="model-selector-wrap">
+                        <button (click)="toggleDropdown($event)"
+                                [class.dropdown-open]="isModelDropdownOpen"
+                                class="model-dropdown-btn">
+                            <div class="model-name-wrap">
+                                <span class="model-name-selected">{{ currentModel.name }}</span>
+                            </div>
+                            <div class="chevron-icon-wrap">
+                                <svg [class.rotate]="isModelDropdownOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                        </button>
+
+                        <div *ngIf="isModelDropdownOpen" (click)="$event.stopPropagation()" class="model-dropdown-menu">
+                            <button *ngFor="let model of models" (click)="selectModel(model.id)" class="model-option-btn">
+                                <div class="model-info-col">
+                                    <div class="model-title-row">
+                                        <span class="model-label-text">{{ model.name }}</span>
+                                        <span *ngIf="model.badge" [class.badge-upgrade]="model.badge === 'Upgrade'" class="model-badge">{{ model.badge }}</span>
+                                    </div>
+                                    <span class="model-desc-text">{{ model.description }}</span>
+                                </div>
+                                <svg *ngIf="selectedModel === model.id" class="selected-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="more-models-btn">
+                                <span class="more-models-text">More models</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button (click)="handleSend()" [disabled]="!hasContent" [class.active]="hasContent" class="send-btn" type="button" aria-label="Send message">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drag overlay -->
+    <div *ngIf="isDragging" class="drag-overlay">
+        <svg class="drag-icon animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+        <p class="drag-text">Drop files to upload</p>
+    </div>
+
+    <input #fileInputRef type="file" multiple class="hidden" (change)="onFileSelected($event)" />
+
+    <div class="footnote-row">
+        <p class="footnote-text">AI can make mistakes. Please check important information.</p>
+    </div>
+</div>
+
+<div *ngIf="isModelDropdownOpen" (click)="isModelDropdownOpen = false" class="dropdown-backdrop"></div>

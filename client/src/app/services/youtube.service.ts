@@ -20,10 +20,12 @@ export interface YouTubeSearchResponse {
 export class YouTubeService {
   private http = inject(HttpClient);
   // Using the absolute URL since we need to hit the Express backend API
-  private baseUrl = 'http://localhost:8080/api/music/youtube/search';
+  private baseUrl = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? 'http://localhost:8080/api'
+    : 'https://genz-studio-api.onrender.com/api';
 
   searchTracks(query: string, pageToken: string = ''): Observable<YouTubeSearchResponse> {
-    let url = `${this.baseUrl}?q=${encodeURIComponent(query)}`;
+    let url = `${this.baseUrl}/music/youtube/search?q=${encodeURIComponent(query)}`;
     if (pageToken) {
       url += `&pageToken=${pageToken}`;
     }

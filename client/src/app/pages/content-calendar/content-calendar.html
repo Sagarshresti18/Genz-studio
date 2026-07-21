@@ -8,29 +8,55 @@
     </div>
     <button class="primary-btn" (click)="openAdd()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Post
+      Schedule Post
     </button>
   </div>
 
-  <!-- Stats -->
+  <!-- Stats Cards -->
   <div class="stats-row">
-    <div class="stat-chip"><span class="stat-chip__val">{{ stats().total }}</span><span>Total</span></div>
-    <div class="stat-chip stat-chip--blue"><span class="stat-chip__val">{{ stats().scheduled }}</span><span>Scheduled</span></div>
-    <div class="stat-chip stat-chip--yellow"><span class="stat-chip__val">{{ stats().draft }}</span><span>Drafts</span></div>
-    <div class="stat-chip stat-chip--green"><span class="stat-chip__val">{{ stats().published }}</span><span>Published</span></div>
+    <div class="stat-chip">
+      <span class="stat-chip__val">{{ stats().total }}</span>
+      <span class="stat-chip__lbl">Total Posts</span>
+    </div>
+    <div class="stat-chip stat-chip--blue">
+      <span class="stat-chip__val">{{ stats().scheduled }}</span>
+      <span class="stat-chip__lbl">Scheduled</span>
+    </div>
+    <div class="stat-chip stat-chip--yellow">
+      <span class="stat-chip__val">{{ stats().draft }}</span>
+      <span class="stat-chip__lbl">Drafts</span>
+    </div>
+    <div class="stat-chip stat-chip--green">
+      <span class="stat-chip__val">{{ stats().published }}</span>
+      <span class="stat-chip__lbl">Published</span>
+    </div>
   </div>
 
-  <!-- Toolbar -->
+  <!-- Toolbar Control Deck -->
   <div class="cal-toolbar">
     <div class="week-nav">
-      <button class="nav-btn" (click)="prevWeek()">
+      <button class="nav-btn" (click)="prevPeriod()" title="Previous">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <span class="week-label">{{ weekRange() }}</span>
-      <button class="nav-btn" (click)="nextWeek()">
+      <span class="week-label">{{ periodLabel() }}</span>
+      <button class="nav-btn" (click)="nextPeriod()" title="Next">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
+
+    <!-- Toggle & Search Filters -->
+    <div class="toolbar-center">
+      <div class="view-toggle">
+        <button class="vt-btn" [class.vt-btn--on]="viewMode() === 'week'" (click)="viewMode.set('week')">Week</button>
+        <button class="vt-btn" [class.vt-btn--on]="viewMode() === 'month'" (click)="viewMode.set('month')">Month</button>
+      </div>
+      <div class="search-input-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search posts..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+      </div>
+    </div>
+
+    <!-- Platform Badges -->
     <div class="platform-filters">
       <button class="pf-btn" [class.pf-btn--on]="filterPlatform()==='all'" (click)="filterPlatform.set('all')">All</button>
       @for (p of platforms; track p.key) {
@@ -40,56 +66,91 @@
     </div>
   </div>
 
-  <!-- Week Grid -->
-  <div class="week-grid">
-    @for (day of weekDays(); track day.toISOString()) {
-      <div class="day-col" [class.day-col--today]="isToday(day)">
-        <div class="day-col__head" (click)="openAdd(day)">
-          <span class="day-col__name">{{ dayLabel(day) }}</span>
-          <span class="day-col__num" [class.today-badge]="isToday(day)">{{ dayNum(day) }}</span>
-          @if (isToday(day)) { <span class="today-dot"></span> }
-        </div>
-        <div class="day-col__body">
-          @for (post of postsForDay(day); track post.id) {
-            <div class="post-card" [style.--pc]="post.color" (click)="openEdit(post, $event)">
-              <div class="post-card__top">
-                <span class="post-card__platform" [style.background]="post.color + '22'" [style.color]="post.color">
-                  {{ getPlatform(post.platform)?.label }}
-                </span>
-                <span class="post-card__status" [class]="'status--' + post.status">{{ post.status }}</span>
-              </div>
-              <p class="post-card__title">{{ post.title }}</p>
-              <div class="post-card__foot">
-                <span class="post-card__time">{{ post.time }}</span>
-                <span class="post-card__type">{{ post.type }}</span>
-                <button class="post-card__del" (click)="deletePost(post.id, $event)">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              </div>
-            </div>
-          }
-          <button class="add-day-btn" (click)="openAdd(day)">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
+  <!-- Month Grid View -->
+  @if (viewMode() === 'month') {
+    <div class="month-grid-container">
+      <div class="month-grid-header">
+        @for (dayName of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track dayName) {
+          <div class="month-day-name">{{ dayName }}</div>
+        }
       </div>
-    }
-  </div>
+      <div class="month-grid-body">
+        @for (cell of monthDays(); track cell.date.toISOString()) {
+          <div class="month-day-cell" 
+               [class.month-day-cell--off]="!cell.isCurrentMonth"
+               [class.month-day-cell--today]="cell.isToday"
+               (click)="openAdd(cell.date)">
+            <div class="cell-head">
+              <span class="cell-num" [class.today-badge]="cell.isToday">{{ dayNum(cell.date) }}</span>
+              @if (cell.isToday) { <span class="today-dot"></span> }
+            </div>
+            <div class="cell-body">
+              @for (post of postsForDay(cell.date); track post.id) {
+                <div class="post-pill" 
+                     [style.borderLeftColor]="post.color"
+                     (click)="openEdit(post, $event)"
+                     title="{{ post.title }}">
+                  <span class="post-pill-type" [style.color]="post.color">{{ post.type }}</span>
+                  <span class="post-pill-title">{{ post.title }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- Week Grid View -->
+    <div class="week-grid">
+      @for (day of weekDays(); track day.toISOString()) {
+        <div class="day-col" [class.day-col--today]="isToday(day)">
+          <div class="day-col__head" (click)="openAdd(day)">
+            <span class="day-col__name">{{ dayLabel(day) }}</span>
+            <span class="day-col__num" [class.today-badge]="isToday(day)">{{ dayNum(day) }}</span>
+            @if (isToday(day)) { <span class="today-dot"></span> }
+          </div>
+          <div class="day-col__body">
+            @for (post of postsForDay(day); track post.id) {
+              <div class="post-card" [style.--pc]="post.color" (click)="openEdit(post, $event)">
+                <div class="post-card__top">
+                  <span class="post-card__platform" [style.background]="post.color + '18'" [style.color]="post.color">
+                    {{ getPlatform(post.platform)?.label }}
+                  </span>
+                  <span class="post-card__status" [class]="'status--' + post.status">{{ post.status }}</span>
+                </div>
+                <p class="post-card__title">{{ post.title }}</p>
+                <div class="post-card__foot">
+                  <span class="post-card__time">{{ post.time }}</span>
+                  <span class="post-card__type">{{ post.type }}</span>
+                  <button class="post-card__del" (click)="deletePost(post.id, $event)" title="Delete post">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+            }
+            <button class="add-day-btn" (click)="openAdd(day)" title="Add post to this day">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
 
-  <!-- Modal -->
+  <!-- Modal Dialog -->
   @if (showModal()) {
     <div class="modal-backdrop" (click)="showModal.set(false)">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-head">
-          <h2>{{ editPost() ? 'Edit Post' : 'Schedule Post' }}</h2>
+          <h2>{{ editPost() ? 'Edit Scheduled Post' : 'Schedule Content Post' }}</h2>
           <button class="modal-close" (click)="showModal.set(false)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
         <div class="modal-body">
-            <div class="field-group">
-            <label class="field-label">Title</label>
-            <input class="input" type="text" placeholder="Post title..."
+          <div class="field-group">
+            <label class="field-label">Post Title</label>
+            <input class="input" type="text" placeholder="e.g. Creator Economy Trends in 2026..."
               [value]="form().title" (input)="onTitleInput($event)" />
           </div>
           <div class="row-2">

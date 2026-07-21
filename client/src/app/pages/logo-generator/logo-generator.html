@@ -1,16 +1,242 @@
-<div class="feature-page">
-  <div class="feature-hero" style="--accent:#8B5CF6">
-    <div class="feature-hero__glow"></div>
-    <span class="feature-hero__icon">◈</span>
-    <h1 class="feature-hero__title">Logo Generator</h1>
-    <p class="feature-hero__sub">Describe your brand and get a unique, professional logo in seconds — powered by AI.</p>
-    <button class="feature-hero__btn">Generate Logo</button>
+<div class="logo-studio-container">
+  <div class="studio-header">
+    <h1 class="page-title">AI Logo Studio</h1>
+    <p class="page-subtitle">Generate scalable, production-ready vector logos for your brand instantly.</p>
   </div>
-  <div class="feature-placeholder">
-    <div class="ph-card" *ngFor="let i of items">
-      <div class="ph-thumb" style="background:linear-gradient(135deg,#8B5CF622,#8B5CF644)"></div>
-      <div class="ph-line ph-line--lg"></div>
-      <div class="ph-line ph-line--sm"></div>
+
+  <div class="studio-layout">
+    
+    <!-- Editor Card (Left Column) -->
+    <div class="glass-card editor-card">
+      <div class="card-header">
+        <h3>Brand Concept</h3>
+        <span class="char-count">{{brandTypography.length + visualCoreConcept.length}} characters</span>
+      </div>
+      
+      <!-- Brand Typography -->
+      <div class="form-group">
+        <label for="brandTypography">Brand Typography</label>
+        <input 
+          id="brandTypography" 
+          type="text" 
+          [(ngModel)]="brandTypography" 
+          placeholder="Type your brand name (e.g., AURA, VORTEX)..." 
+          class="form-control font-bold tracking-wider" 
+        />
+      </div>
+
+      <!-- Visual Core Concept -->
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <label style="margin: 0;">Visual Core Concept</label>
+          <button 
+            class="btn-preview" 
+            (click)="enhancePrompt()" 
+            [disabled]="isEnhancing" 
+            title="Enhance Prompt with AI"
+            style="width: auto; height: auto; padding: 4px 10px; font-size: 11px; font-weight: 600;"
+          >
+            @if (isEnhancing) {
+              <span>Enriching...</span>
+            } @else {
+              <span>✦ Enhance with AI</span>
+            }
+          </button>
+        </div>
+        <textarea 
+          id="visualCoreConcept"
+          class="script-editor" 
+          [(ngModel)]="visualCoreConcept" 
+          placeholder="Describe the core imagery, logo symbol style, and geometry..."></textarea>
+      </div>
+    </div>
+
+    <!-- Settings Panel (Right Column) -->
+    <div class="settings-panel">
+      <div class="glass-card">
+        <h3>Logo Settings</h3>
+        
+        <!-- Design Archetype Selector -->
+        <div class="form-group">
+          <label for="designArchetype">Design Archetype</label>
+          <select id="designArchetype" class="form-control" [(ngModel)]="designArchetype">
+            <option value="swiss">Minimalist Swiss (Flat vector geometric)</option>
+            <option value="mascot">Esports Mascot (Bold outlines)</option>
+            <option value="lettermark">Lettermark (Abstract typographic)</option>
+          </select>
+        </div>
+
+        <!-- Canvas Isolator Selector -->
+        <div class="form-group">
+          <label for="canvasIsolator">Canvas Background Isolation</label>
+          <select id="canvasIsolator" class="form-control" [(ngModel)]="canvasIsolator">
+            <option value="black">Pure Black Solid (#000000)</option>
+            <option value="white">Pure White Solid (#FFFFFF)</option>
+          </select>
+        </div>
+
+        <!-- Color Matrix Spec -->
+        <div class="form-group">
+          <label for="colorMatrixSpec">Color Matrix Spec</label>
+          <input 
+            id="colorMatrixSpec" 
+            type="text" 
+            [(ngModel)]="colorMatrixSpec" 
+            placeholder="e.g., Neon Cyan (#06B6D4) & Digital Violet" 
+            class="form-control" 
+          />
+          <p class="help-text">Define hex codes or colors to apply to the logo vector gradients.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generation Card (Left Bottom) -->
+    <div class="glass-card generation-card">
+      <button 
+        class="btn btn-primary btn-generate" 
+        (click)="generateLogo()" 
+        [disabled]="isGenerating || !brandTypography || !visualCoreConcept"
+      >
+        <span *ngIf="!isGenerating">Compile Brand Asset</span>
+        <span *ngIf="isGenerating">Processing Pipeline...</span>
+      </button>
+
+      <!-- Loading State -->
+      <div class="processing-state" *ngIf="isGenerating">
+        <div class="waveform-anim">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <p>Executing GPU cluster pipeline... [Estimated time: 2.1s]</p>
+      </div>
+
+      <!-- Success State: Render dynamic vector image -->
+      <div class="player-wrapper" *ngIf="generatedLogoReady && !isGenerating" style="margin-top: 1.5rem;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+          
+          <!-- Scalable Logo Frame -->
+          <div 
+            class="viewport-canvas-frame transparency-checkerboard"
+            [style.background-color]="canvasIsolator === 'white' ? '#FFFFFF' : '#0B0F19'"
+            style="width: 100%; max-width: 220px; aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 1rem; border: 1px solid var(--border-default);"
+          >
+            <!-- Generated Logo SVG -->
+            <svg class="logo-viewport-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+              <defs>
+                <linearGradient id="studio-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" [attr.stop-color]="getParsedColors().c1" />
+                  <stop offset="100%" [attr.stop-color]="getParsedColors().c2" />
+                </linearGradient>
+                
+                <filter id="studio-shadow-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.3"/>
+                </filter>
+              </defs>
+
+              <!-- Render dynamic geometries from active compiler -->
+              <!-- Dynamic Circles -->
+              @for (c of svgCircles; track $index) {
+                <circle 
+                  [attr.cx]="c.cx" 
+                  [attr.cy]="c.cy" 
+                  [attr.r]="c.r" 
+                  [attr.fill]="c.fill" 
+                  [attr.stroke]="c.stroke" 
+                  [attr.stroke-width]="c.strokeWidth" 
+                  [attr.opacity]="c.opacity"
+                  [attr.stroke-dasharray]="c.dashArray || null" />
+              }
+
+              <!-- Dynamic Polygons -->
+              @for (p of svgPolygons; track $index) {
+                <polygon 
+                  [attr.points]="p.points" 
+                  [attr.fill]="p.fill" 
+                  [attr.stroke]="p.stroke" 
+                  [attr.stroke-width]="p.strokeWidth" />
+              }
+
+              <!-- Dynamic Paths -->
+              @for (path of svgPaths; track $index) {
+                <path 
+                  [attr.d]="path.d" 
+                  [attr.fill]="path.fill" 
+                  [attr.stroke]="path.stroke" 
+                  [attr.stroke-width]="path.strokeWidth"
+                  [attr.opacity]="path.opacity" />
+              }
+
+              <!-- Dynamic Text -->
+              @for (t of svgText; track $index) {
+                <text 
+                  [attr.x]="t.x" 
+                  [attr.y]="t.y" 
+                  [attr.fill]="t.fill" 
+                  [attr.font-size]="t.fontSize"
+                  [attr.letter-spacing]="t.letterSpacing || null"
+                  text-anchor="middle" 
+                  font-family="'Outfit', 'Inter', sans-serif" 
+                  font-weight="900"
+                >
+                  {{ t.text }}
+                </text>
+              }
+
+              <!-- Brand typography text -->
+              <g>
+                <text 
+                  x="100" 
+                  y="172" 
+                  text-anchor="middle" 
+                  font-family="'Inter', sans-serif" 
+                  font-weight="900" 
+                  font-size="14" 
+                  letter-spacing="5" 
+                  [attr.fill]="canvasIsolator === 'white' ? '#0F172A' : '#F8FAFC'"
+                >
+                  {{ brandTypography }}
+                </text>
+                <text 
+                  x="100" 
+                  y="186" 
+                  text-anchor="middle" 
+                  font-family="monospace" 
+                  font-size="6" 
+                  letter-spacing="1" 
+                  fill="#64748B"
+                >
+                  DYNAMIC COMPILER // MASK_ALPHA
+                </text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Utility Output Actions -->
+          <div style="display: flex; gap: 1rem; width: 100%; max-width: 320px;">
+            <button class="btn btn-outline" style="flex: 1; padding: 0.65rem;" (click)="downloadAsset()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; display: inline;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Download SVG
+            </button>
+            <button class="btn btn-outline" style="flex: 1; padding: 0.65rem;" (click)="copyPromptSignature()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; display: inline;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Signature
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification overlays -->
+  <div class="toast-overlay" *ngIf="showCopyToast">
+    <div class="toast-card">
+      <span>Signature signature successfully copied to clipboard.</span>
+    </div>
+  </div>
+  <div class="toast-overlay" *ngIf="showDownloadToast">
+    <div class="toast-card">
+      <span>Generating and downloading SVG vector asset...</span>
     </div>
   </div>
 </div>

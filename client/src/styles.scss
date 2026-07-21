@@ -2,18 +2,19 @@
 // GenZ Studio — Global Styles
 // ============================================================
 
+
 // ── Google Fonts ─────────────────────────────────────────────
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 // ── Design Tokens (CSS Custom Properties) ────────────────────
 :root {
-  // Brand
-  --brand-primary: #7C3AED;
-  --brand-primary-hover: #6D28D9;
-  --brand-primary-rgb: 124, 58, 237;
-  --brand-secondary: #06B6D4;
-  --brand-secondary-rgb: 6, 182, 212;
+  // Brand accent templates
+  --brand-primary: var(--theme-color-primary, #7C3AED);
+  --brand-primary-hover: var(--theme-color-primary-hover, #6D28D9);
+  --brand-primary-rgb: var(--theme-color-primary-rgb, 124, 58, 237);
+  --brand-secondary: var(--theme-color-secondary, #06B6D4);
+  --brand-secondary-rgb: var(--theme-color-secondary-rgb, 6, 182, 212);
   --brand-accent: #F59E0B;
   --brand-accent-rgb: 245, 158, 11;
 
@@ -120,6 +121,38 @@
   --z-toast: 500;
 
   color-scheme: light;
+}
+
+:root.dark {
+  // Backgrounds
+  --bg-base: #000000;
+  --bg-surface: #07070a;
+  --bg-elevated: #0f0f13;
+  --bg-hover: #17171e;
+  --bg-active: #22222b;
+  --bg-input: #0f0f13;
+
+  // Borders
+  --border-default: #141418;
+  --border-hover: #26262f;
+  --border-focus: var(--brand-primary);
+
+  // Text
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+
+  // Glass
+  --glass-bg: rgba(7, 7, 10, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.035);
+
+  // Shadows
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 24px 56px rgba(0, 0, 0, 0.8);
+
+  color-scheme: dark;
 }
 
 // ── CSS Reset / Normalize ────────────────────────────────────
@@ -676,3 +709,46 @@ textarea {
 .page-enter {
   animation: fadeIn 0.2s ease, slideUp 0.3s ease;
 }
+
+// ── Accent Color Themes ──────────────────────────────────────
+:root.theme-violet {
+  --theme-color-primary: #7C3AED;
+  --theme-color-primary-hover: #6D28D9;
+  --theme-color-primary-rgb: 124, 58, 237;
+  --theme-color-secondary: #06B6D4;
+  --theme-color-secondary-rgb: 6, 182, 212;
+}
+
+:root.theme-blue {
+  --theme-color-primary: #3B82F6;
+  --theme-color-primary-hover: #2563EB;
+  --theme-color-primary-rgb: 59, 130, 246;
+  --theme-color-secondary: #10B981;
+  --theme-color-secondary-rgb: 16, 185, 129;
+}
+
+:root.theme-emerald {
+  --theme-color-primary: #10B981;
+  --theme-color-primary-hover: #059669;
+  --theme-color-primary-rgb: 16, 185, 129;
+  --theme-color-secondary: #06B6D4;
+  --theme-color-secondary-rgb: 6, 182, 212;
+}
+
+:root.theme-rose {
+  --theme-color-primary: #F43F5E;
+  --theme-color-primary-hover: #E11D48;
+  --theme-color-primary-rgb: 244, 63, 94;
+  --theme-color-secondary: #8B5CF6;
+  --theme-color-secondary-rgb: 139, 92, 246;
+}
+
+:root.theme-amber {
+  --theme-color-primary: #F59E0B;
+  --theme-color-primary-hover: #D97706;
+  --theme-color-primary-rgb: 245, 158, 11;
+  --theme-color-secondary: #10B981;
+  --theme-color-secondary-rgb: 16, 185, 129;
+}
+
+// Styles completed

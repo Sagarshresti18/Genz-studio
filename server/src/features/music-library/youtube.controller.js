@@ -1,8 +1,8 @@
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || 'AIzaSyATQG0fU8dVs5c271TReMniMka2JY5QNb8';
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 const searchYouTube = async (req, res, next) => {
   try {
-    const query = req.query.q || 'Kannada hit songs audio';
+    const query = req.query.q || 'songs';
     const pageToken = req.query.pageToken || '';
     
     // We can use native fetch in Node 18+

@@ -33,8 +33,10 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
   loadingMore = false;
   errorMsg = '';
   
-  searchQuery = 'Kannada hit songs audio';
+  searchQuery = 'songs';
   nextPageToken = ''; // for youtube pagination
+  
+  viewMode: 'grid' | 'list' = 'grid';
   
   currentlyPlayingId: string | null = null;
   currentTrack: UnifiedTrack | null = null;
@@ -147,8 +149,14 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
     
     this.errorMsg = '';
     
+    let actualQuery = this.searchQuery.trim();
+    const lowerQuery = actualQuery.toLowerCase();
+    if (actualQuery && !lowerQuery.includes('song') && !lowerQuery.includes('music')) {
+      actualQuery += ' songs';
+    }
+    
     // First fetch YouTube, then fetch Jamendo
-    this.ytService.searchTracks(this.searchQuery, this.nextPageToken).subscribe({
+    this.ytService.searchTracks(actualQuery, this.nextPageToken).subscribe({
       next: (res) => {
         const ytTracks: UnifiedTrack[] = res.items.map(item => ({
           id: item.videoId,
@@ -168,7 +176,7 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
         
         // If it's a fresh search, also fetch Jamendo tracks
         if (!isLoadMore) {
-          this.jamendoService.getTracks(30, this.searchQuery).subscribe({
+          this.jamendoService.getTracks(30, actualQuery).subscribe({
             next: (jTracks) => {
               const jamendoUnified: UnifiedTrack[] = jTracks.map(t => ({
                 id: t.id,
@@ -347,6 +355,24 @@ export class MusicLibraryPage implements OnInit, OnDestroy, AfterViewInit {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    }
+  }
+
+  copyLink(track: UnifiedTrack, event: Event) {
+    event.stopPropagation();
+    let url = '';
+    if (track.type === 'youtube') {
+      url = `https://www.youtube.com/watch?v=${track.id}`;
+    } else if (track.type === 'jamendo' && track.audioUrl) {
+      url = track.audioUrl;
+    }
+    
+    if (url) {
+      navigator.clipboard.writeText(url).then(() => {
+        // Simple visual feedback could be added here
+      }).catch(err => {
+        console.error('Failed to copy link', err);
+      });
     }
   }
 }

@@ -73,7 +73,32 @@ async function generateContent(req, res, next) {
 
     let outputText = '';
 
-    if (env.OPENAI_API_KEY) {
+    if (env.GEMINI_API_KEY) {
+      const { GoogleGenAI } = require('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+      
+      try {
+        const responseStream = await ai.models.generateContentStream({
+          model: 'gemini-2.5-flash',
+          contents: enhancedPrompt,
+          config: {
+            systemInstruction: typeConfig.system,
+          }
+        });
+
+        for await (const chunk of responseStream) {
+          const token = chunk.text || '';
+          if (token) {
+            outputText += token;
+            res.write(`data: ${JSON.stringify({ token })}\n\n`);
+          }
+        }
+      } catch (geminiErr) {
+        console.error('Gemini streaming error:', geminiErr);
+        res.write(`data: ${JSON.stringify({ error: geminiErr.message || 'Gemini error' })}\n\n`);
+        return res.end();
+      }
+    } else if (env.OPENAI_API_KEY) {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },

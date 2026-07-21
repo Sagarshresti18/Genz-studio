@@ -17,6 +17,30 @@ interface NavGroup {
   items: NavItem[];
 }
 
+interface Workspace {
+  id: string;
+  name: string;
+  role: string;
+  logoColor: string;
+  logoLetter: string;
+}
+
+interface AppNotification {
+  id: string;
+  title: string;
+  desc: string;
+  time: string;
+  read: boolean;
+  type: 'alert' | 'success' | 'info';
+}
+
+interface AccentTheme {
+  id: string;
+  name: string;
+  class: string;
+  primaryColor: string;
+}
+
 @Component({
   selector: 'app-layout',
   standalone: true,
@@ -27,13 +51,48 @@ interface NavGroup {
 export class WorkspaceLayoutComponent {
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
-  protected readonly sidebarCollapsed = signal(false); // Always expanded on desktop
+  protected readonly sidebarCollapsed = signal(localStorage.getItem('sidebarCollapsed') === 'true');
   protected readonly mobileMenuOpen = signal(false);
   protected readonly showUserMenu = signal(false);
+  protected readonly showWorkspaceMenu = signal(false);
+  protected readonly showNotifications = signal(false);
+
+  protected readonly isDarkMode = signal<boolean>(
+    (typeof localStorage !== 'undefined' && localStorage.getItem('theme') === 'dark') ||
+    (typeof localStorage !== 'undefined' && !localStorage.getItem('theme') && typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  );
+
+  protected readonly accentThemes = signal<AccentTheme[]>([
+    { id: 'violet', name: 'Violet', class: 'theme-violet', primaryColor: '#7C3AED' },
+    { id: 'blue', name: 'Blue', class: 'theme-blue', primaryColor: '#3B82F6' },
+    { id: 'emerald', name: 'Emerald', class: 'theme-emerald', primaryColor: '#10B981' },
+    { id: 'rose', name: 'Rose', class: 'theme-rose', primaryColor: '#F43F5E' },
+    { id: 'amber', name: 'Amber', class: 'theme-amber', primaryColor: '#F59E0B' }
+  ]);
+  protected readonly activeThemeColor = signal<string>(localStorage.getItem('activeThemeColor') || 'violet');
+  protected readonly showThemeMenu = signal(false);
 
   protected readonly userName = computed(() => this.auth.user()?.fullName ?? 'Creator');
   protected readonly userEmail = computed(() => this.auth.user()?.email ?? '');
   protected readonly userInitials = computed(() => this.auth.userInitials());
+
+  // ── Workspaces ───────────────────────────────────────────
+  protected readonly workspaces = signal<Workspace[]>([
+    { id: 'genz-studio', name: 'GenZ Studio', role: 'Owner', logoColor: 'linear-gradient(135deg, #7C3AED, #06B6D4)', logoLetter: 'GZ' }
+  ]);
+  protected readonly activeWorkspaceId = signal<string>(localStorage.getItem('activeWorkspaceId') || 'genz-studio');
+  protected readonly activeWorkspace = computed(() => {
+    return this.workspaces().find(w => w.id === this.activeWorkspaceId()) || this.workspaces()[0];
+  });
+
+  // ── Notifications ────────────────────────────────────────
+  protected readonly notifications = signal<AppNotification[]>([
+    { id: '1', title: 'Task Approved', desc: 'Sanjay approved the "Neon Channel Banner" design.', time: '5m ago', read: false, type: 'success' },
+    { id: '2', title: 'Milestone Approaching', desc: 'YouTube Vlog publish deadline is tomorrow at 9:00 AM.', time: '2h ago', read: false, type: 'alert' },
+    { id: '3', title: 'AI Credits Restored', desc: 'Your workspace AI credits have been reset to 2,400.', time: '1d ago', read: true, type: 'info' },
+    { id: '4', title: 'New Comment', desc: 'Priya K. left a comment on "Summer Vlog Thumbnail".', time: '2d ago', read: true, type: 'info' }
+  ]);
+  protected readonly unreadNotificationsCount = computed(() => this.notifications().filter(n => !n.read).length);
 
   protected readonly navGroups = signal<NavGroup[]>([
     {
@@ -74,7 +133,10 @@ export class WorkspaceLayoutComponent {
     }
   ]);
 
-  constructor(protected auth: AuthService) {}
+  constructor(protected auth: AuthService) {
+    this.applyTheme(this.isDarkMode());
+    this.applyAccentTheme(this.activeThemeColor());
+  }
 
   @HostListener('document:keydown', ['$event'])
   handleKeydown(event: KeyboardEvent) {
@@ -83,22 +145,39 @@ export class WorkspaceLayoutComponent {
       event.preventDefault();
       this.searchInput?.nativeElement?.focus();
     }
-    // Escape to close user menu
+    // Escape to close menus
     if (event.key === 'Escape') {
       this.showUserMenu.set(false);
+      this.showWorkspaceMenu.set(false);
+      this.showNotifications.set(false);
+      this.showThemeMenu.set(false);
     }
   }
 
   @HostListener('document:click', ['$event'])
   handleDocumentClick(event: Event) {
-    // Close user dropdown when clicking outside
     const target = event.target as HTMLElement;
+    // Close dropdowns when clicking outside
     if (!target.closest('.user-section')) {
       this.showUserMenu.set(false);
     }
+    if (!target.closest('.workspace-selector-container')) {
+      this.showWorkspaceMenu.set(false);
+    }
+    if (!target.closest('.notifications-btn-container')) {
+      this.showNotifications.set(false);
+    }
+    if (!target.closest('.theme-selector-container')) {
+      this.showThemeMenu.set(false);
+    }
   }
 
-  protected toggleSidebar(): void { /* Sidebar is fixed - no toggle on desktop */ }
+  protected toggleSidebar(): void {
+    const newVal = !this.sidebarCollapsed();
+    this.sidebarCollapsed.set(newVal);
+    localStorage.setItem('sidebarCollapsed', String(newVal));
+  }
+
   protected toggleMobileMenu(): void { this.mobileMenuOpen.update(v => !v); }
   protected closeMobileMenu(): void { this.mobileMenuOpen.set(false); }
 
@@ -112,6 +191,70 @@ export class WorkspaceLayoutComponent {
 
   protected toggleUserMenu(): void {
     this.showUserMenu.update(v => !v);
+  }
+
+  protected toggleWorkspaceMenu(): void {
+    this.showWorkspaceMenu.update(v => !v);
+  }
+
+  protected toggleThemeMenu(): void {
+    this.showThemeMenu.update(v => !v);
+  }
+
+  protected selectWorkspace(workspaceId: string): void {
+    this.activeWorkspaceId.set(workspaceId);
+    localStorage.setItem('activeWorkspaceId', workspaceId);
+    this.showWorkspaceMenu.set(false);
+    window.dispatchEvent(new CustomEvent('workspaceChanged', { detail: workspaceId }));
+  }
+
+  protected selectAccentTheme(themeId: string): void {
+    this.activeThemeColor.set(themeId);
+    localStorage.setItem('activeThemeColor', themeId);
+    this.applyAccentTheme(themeId);
+    this.showThemeMenu.set(false);
+  }
+
+  private applyAccentTheme(themeId: string): void {
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      this.accentThemes().forEach(t => {
+        root.classList.remove(t.class);
+      });
+      const active = this.accentThemes().find(t => t.id === themeId);
+      if (active) {
+        root.classList.add(active.class);
+      }
+    }
+  }
+
+  protected toggleTheme(): void {
+    const newVal = !this.isDarkMode();
+    this.isDarkMode.set(newVal);
+    localStorage.setItem('theme', newVal ? 'dark' : 'light');
+    this.applyTheme(newVal);
+  }
+
+  private applyTheme(dark: boolean): void {
+    if (typeof document !== 'undefined') {
+      if (dark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }
+
+  protected toggleNotifications(): void {
+    this.showNotifications.update(v => !v);
+  }
+
+  protected markAllNotificationsAsRead(): void {
+    this.notifications.update(notifs => notifs.map(n => ({ ...n, read: true })));
+  }
+
+  protected clearNotifications(): void {
+    this.notifications.set([]);
   }
 
   protected logout(): void {
