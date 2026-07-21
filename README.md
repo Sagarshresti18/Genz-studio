@@ -176,3 +176,5 @@ npm run build
 - Keep frontend changes inside `client/`.
 - Keep backend changes inside `server/`.
 - Update the docs when you change setup, ports, or environment variables.
+
+.
