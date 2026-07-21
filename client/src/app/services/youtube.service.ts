@@ -19,8 +19,8 @@ export interface YouTubeSearchResponse {
 })
 export class YouTubeService {
   private http = inject(HttpClient);
-  // Using relative path for production, localhost for development
-  private baseUrl = isDevMode() ? 'http://localhost:5000/api' : '/api';
+  // Using Render backend for production, localhost for development
+  private baseUrl = isDevMode() ? 'http://localhost:5000/api' : 'https://genz-studio-api.onrender.com/api';
 
   searchTracks(query: string, pageToken: string = ''): Observable<YouTubeSearchResponse> {
     let url = `${this.baseUrl}/music/youtube/search?q=${encodeURIComponent(query)}`;
