@@ -39,7 +39,13 @@
             </svg>
           </button>
           
-          <button class="music-card__action music-card__action--copy" *ngIf="track.type === 'youtube'" (click)="copyLink(track, $event)" title="Copy Link">
+          <button class="music-card__action music-card__action--open-yt" *ngIf="track.type === 'youtube'" (click)="openInYouTube(track, $event)" title="Watch on YouTube" aria-label="Watch on YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+            </svg>
+          </button>
+
+          <button class="music-card__action music-card__action--copy" *ngIf="track.type === 'youtube'" (click)="copyYouTubeLink(track, $event)" title="Copy Link" aria-label="Copy YouTube Link">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
             </svg>
@@ -65,6 +71,11 @@
     <button class="music-search__btn load-more-btn" (click)="loadMore()">Load More</button>
   </div>
 
+  <div class="yt-mini-player" [class.is-active]="currentTrack?.type === 'youtube'">
+    <div class="yt-attribution">Powered by YouTube</div>
+    <div id="youtube-player"></div>
+  </div>
+
   <div class="music-player" *ngIf="currentTrack">
     <div class="music-player__left">
       <img [src]="currentTrack.thumbnail" [alt]="currentTrack.title" class="music-player__thumb">
@@ -86,9 +97,14 @@
         <button class="music-player__btn" (click)="nextTrack()">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
         </button>
-        <button class="music-player__btn" style="margin-left: 12px; transform: scale(0.9);" *ngIf="currentTrack.type === 'youtube'" (click)="copyLink(currentTrack, $event)" title="Copy Link">
+        <button class="music-player__btn" style="margin-left: 12px; transform: scale(0.9);" *ngIf="currentTrack.type === 'youtube'" (click)="copyYouTubeLink(currentTrack, $event)" title="Copy Link" aria-label="Copy YouTube Link">
           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
             <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+          </svg>
+        </button>
+        <button class="music-player__btn" style="transform: scale(0.9);" *ngIf="currentTrack.type === 'youtube'" (click)="openInYouTube(currentTrack, $event)" title="Watch on YouTube" aria-label="Watch on YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
           </svg>
         </button>
       </div>
@@ -106,4 +122,6 @@
   </div>
 </div>
 
-<div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px;"></div>
+<div class="toast" [class.toast--visible]="showToast">
+  {{ toastMessage }}
+</div>
